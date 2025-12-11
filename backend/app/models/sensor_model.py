@@ -1,28 +1,37 @@
 import sqlite3
 from app.config import Config
+import time
 
 DB_PATH = Config.DB_PATH
 
 class SensorModel:
+    
     @staticmethod
     def create_table():
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS sensor_data (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    timestamp INTEGER NOT NULL,
                     temperature REAL,
                     humidity REAL
                 )
             """)
 
     @staticmethod
-    def insert(temperature, humidity):
+    def insert(temperature, humidity, timestamp=None):
+        if timestamp is None:
+            timestamp = int(time.time())
+
+        # Single connection block, no nested connects
         with sqlite3.connect(DB_PATH) as conn:
-            conn.execute("""
-                INSERT INTO sensor_data (temperature, humidity)
-                VALUES (?, ?)
-            """, (temperature, humidity))
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO sensor_data (temperature, humidity, timestamp)
+                VALUES (?, ?, ?)
+            """, (temperature, humidity, timestamp))
+            conn.commit()
+
 
     @staticmethod
     def get_latest():

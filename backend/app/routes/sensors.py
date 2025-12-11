@@ -5,7 +5,7 @@ from ..utils.auth_middleware import require_auth
 sensors_bp = Blueprint("sensors", __name__)
 
 @sensors_bp.get("/latest")
-@require_auth()
+#@require_auth()
 def latest():
     data = SensorService.get_latest()
     return jsonify({ "success": True, "data": data })
