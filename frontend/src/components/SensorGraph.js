@@ -71,7 +71,7 @@ const SensorGraph = ({ liveData }) => {
       <ResponsiveContainer width="95%" height="80%">
         <LineChart data={data.slice().reverse()}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="timestamp" />
+          <XAxis dataKey="timestamp" reversed={true} />
           <YAxis domain={[yMin - yPadding, yMax + yPadding]} />
           <Tooltip />
           <Legend />
