@@ -1,12 +1,22 @@
 import { authFetch } from "./authFetch";
 
-export function setLedState(state) {
-  return authFetch("/devices/led", {
+// GET /devices
+export function getDevices() {
+  return authFetch("/devices");
+}
+
+// POST /devices
+export function createDevice(device) {
+  return authFetch("/devices", {
     method: "POST",
-    body: JSON.stringify({ state })
+    body: JSON.stringify(device)
   });
 }
 
-export function getLedStatus() {
-  return authFetch("/devices/led/state");
+// POST /devices/:id/state
+export function setDeviceState(id, state) {
+  return authFetch(`devices/${id}/state`, {
+    method: "POST",
+    body: JSON.stringify({ state })
+  });
 }

@@ -18,7 +18,14 @@ def create_app():
     app.config.from_object(Config)
 
     # Basic setup
-    CORS(app)
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": "*",
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Authorization", "Content-Type"],
+        }
+    })
+
     setup_logging(app)
     init_db()
 

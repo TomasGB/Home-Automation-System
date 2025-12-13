@@ -39,6 +39,9 @@ class AuthService:
 
         token = jwt.encode(payload, Config.JWT_SECRET, algorithm="HS256")
 
+        if isinstance(token, bytes):
+            token = token.decode()
+
         return token
 
 
@@ -48,3 +51,16 @@ class AuthService:
         hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
         UserModel.create_user(username, hashed, role)
         return True
+    
+    @staticmethod
+    def verify_token(token):
+        try:
+            decoded = jwt.decode(
+                token,
+                Config.JWT_SECRET,
+                algorithms=["HS256"]
+            )
+            return decoded
+        except Exception:
+            return None
+
