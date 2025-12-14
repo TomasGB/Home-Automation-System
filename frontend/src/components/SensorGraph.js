@@ -14,6 +14,20 @@ import axios from "axios";
 const SensorGraph = ({ liveData }) => {
   const [data, setData] = useState([]);
 
+  // Helper function to format the timestamp
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).format(date);
+  };
+
   useEffect(() => {
     const fetchGraphData = async () => {
       try {
@@ -22,7 +36,12 @@ const SensorGraph = ({ liveData }) => {
         const arr = res.data.data || [];
 
         if (Array.isArray(arr)) {
-          setData(arr.slice(-20));
+          // Format the timestamps of the fetched data
+          const formattedData = arr.map(item => ({
+            ...item,
+            timestamp: formatTimestamp(item.timestamp),
+          }));
+          setData(formattedData.slice(-20));
         }
       } catch (err) {
         console.error("Failed to load graph data:", err);
@@ -39,13 +58,13 @@ const SensorGraph = ({ liveData }) => {
   useEffect(() => {
     if (!liveData) return;
 
-    const withTs = {
+    const withFormattedTimestamp = {
       ...liveData,
-      timestamp: liveData.timestamp || new Date().toISOString(),
+      timestamp: formatTimestamp(liveData.timestamp || new Date().toISOString()),
     };
 
     setData(prev => {
-      const updated = [...prev, withTs];
+      const updated = [...prev, withFormattedTimestamp];
       return updated.slice(-20);
     });
   }, [liveData]);
@@ -59,11 +78,11 @@ const SensorGraph = ({ liveData }) => {
     );
   }
 
-  // Calcular espacio en eje Y
+  // Calculate Y axis space
   const yValues = data.flatMap(d => [d.temperature, d.humidity]);
   const yMin = Math.min(...yValues);
   const yMax = Math.max(...yValues);
-  const yPadding = (yMax - yMin) * 0.1 || 1; // 10% de margen, mínimo 1
+  const yPadding = (yMax - yMin) * 0.1 || 1; // 10% margin, minimum 1
 
   return (
     <div className="card" style={{ height: "400px" }}>

@@ -35,6 +35,25 @@ const CurrentSensorData = ({ liveData }) => {
     setLatest(withTimestamp);
   }, [liveData]);
 
+   // Helper function to format timestamp
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return "";
+
+    // Create a Date object from the timestamp
+    const date = new Date(timestamp);
+
+    // Format the date to the desired format: DD-MM-YYYY HH:mm
+    return date.toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,  // 24-hour format
+    });
+  };
+
   return (
     <div className="card" style={{ textAlign: "center", padding: "20px" }}>
       <h2>Current Sensor Data</h2>
@@ -73,7 +92,7 @@ const CurrentSensorData = ({ liveData }) => {
           </div>
 
           {/* Timestamp */}
-          <p className="label">{latest.timestamp}</p>
+          <p className="label">{formatTimestamp(latest.timestamp)}</p>
         </>
       )}
     </div>
