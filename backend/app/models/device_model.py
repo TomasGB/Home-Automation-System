@@ -17,27 +17,7 @@ class DeviceModel:
                     mqtt_topic TEXT
                 )
             """)
-
-    @staticmethod
-    def get_led_status():
-        with sqlite3.connect(DB_PATH) as conn:
-            row = conn.execute("""
-                SELECT status FROM devices
-                WHERE type='led'
-                LIMIT 1
-            """).fetchone()
-            return row[0] if row else "off"
-
-    @staticmethod
-    def update_led_state(status):
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute("""
-                UPDATE devices
-                SET status=?
-                WHERE type='led'
-            """, (status, ))
-            conn.commit()   # <-- FIXED
-
+    
     @staticmethod
     def get_all():
         with sqlite3.connect(DB_PATH) as conn:
@@ -74,6 +54,21 @@ class DeviceModel:
                 (status, device_id)
             )
             return cur.rowcount > 0  # True if updated
+        
+    @staticmethod
+    def get_device_status(device_id):
+        with sqlite3.connect(DB_PATH) as conn:
+            cur = conn.execute(
+                "SELECT status FROM devices WHERE id=?",
+                (device_id,)
+            )
+            row = cur.fetchone()
+            if row:
+                return row[0]  # The status is in the first column
+            else:
+                return None  # No device found with the given id
+
+    
     @staticmethod
     def get_by_id(device_id):
         with sqlite3.connect(DB_PATH) as conn:
@@ -91,5 +86,17 @@ class DeviceModel:
                     "mqtt_topic": row[4],
                 }
             return None
+    
+    @staticmethod
+    def get_by_mqtt_topic(topic):
+        with sqlite3.connect(DB_PATH) as conn:
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT * FROM devices WHERE mqtt_topic = ?",
+                (topic,)
+            )
+            row = cur.fetchone()
+            return dict(row) if row else None
+
 
 

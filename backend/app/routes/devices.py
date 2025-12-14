@@ -51,6 +51,6 @@ def set_device_state(device_id):
 
     # Publish MQTT message if device has topic
     if device and device.get("mqtt_topic"):
-        mqtt_client.publish(device["mqtt_topic"], json.dumps({"status": state}))
+        mqtt_client.publish(device["mqtt_topic"], json.dumps({"status": state}), retain=True)
 
     return jsonify({"success": True, "data": {"state": state}})

@@ -18,25 +18,6 @@ def init_db():
         timestamp TEXT NOT NULL
     )
     """)
-
-    # -----------------------------------------------------
-    # LED STATUS
-    # -----------------------------------------------------
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS led_status (
-        id INTEGER PRIMARY KEY CHECK (id = 1),
-        state TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-    )
-    """)
-
-    # Insert default LED row if missing
-    cur.execute("SELECT COUNT(*) FROM led_status")
-    if cur.fetchone()[0] == 0:
-        cur.execute(
-            "INSERT INTO led_status (id, state, updated_at) VALUES (1, 'off', CURRENT_TIMESTAMP)"
-        )
-
     # -----------------------------------------------------
     # DEVICES
     # -----------------------------------------------------

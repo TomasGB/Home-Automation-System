@@ -9,11 +9,7 @@ class Config:
     MQTT_BROKER = os.getenv("MQTT_BROKER", "test.mosquitto.org")
     MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
     MQTT_TOPIC_SENSOR = os.getenv("MQTT_TOPIC_SENSOR", "home/sensor/data")
-    #MQTT_TOPIC_LED = os.getenv("MQTT_TOPIC_LED", "home/led/control")
-
-    # Only ONE LED topic – unified
-    #MQTT_TOPIC_SENSOR = os.getenv("MQTT_TOPIC_SENSOR", "home/sensor/data")
-    MQTT_TOPIC_LED = os.getenv("MQTT_TOPIC_LED", "home/led/state")
+    MQTT_BASE_TOPIC = os.getenv("MQTT_TOPIC_DEVICES", "mqtt-explorer-ba30a458/home")
 
 
     # App
