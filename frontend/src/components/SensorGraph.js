@@ -75,8 +75,8 @@ const SensorGraph = ({ liveData }) => {
           <YAxis domain={[yMin - yPadding, yMax + yPadding]} />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="temperature" stroke="#8884d8" />
-          <Line type="monotone" dataKey="humidity" stroke="#82ca9d" />
+          <Line type="monotone" dataKey="temperature" stroke="#e00000ff" />
+          <Line type="monotone" dataKey="humidity" stroke="#1f7bf3ff" />
         </LineChart>
       </ResponsiveContainer>
     </div>
