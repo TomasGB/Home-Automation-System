@@ -48,14 +48,6 @@ const App = () => {
         onLed={(l) => setLiveDevices(l)}
       />
 
-      {/* Modal for adding devices */}
-      {showAddDevice && (
-        <AddDeviceModal
-          onClose={() => setShowAddDevice(false)}
-          onAdded={loadDevices}
-        />
-      )}
-
       {/* Header */}
       <div className="header">
         <h1>🏠 Home Automation</h1>
@@ -64,6 +56,14 @@ const App = () => {
           <button onClick={logout}>Logout</button>
         </div>
       </div>
+
+      {/* Modal for adding devices */}
+      {showAddDevice && (
+        <AddDeviceModal
+          onClose={() => setShowAddDevice(false)}
+          onAdded={loadDevices}
+        />
+      )}
 
       {/* Main GRID */}
       <div className="grid">
@@ -79,7 +79,7 @@ const App = () => {
             <DeviceCard
               key={dev.id}
               device={dev}
-              liveUpdate={liveDevices}   // later: change to generic liveDevice system
+              liveUpdate={liveDevices}
             />
           ))}
         </div>

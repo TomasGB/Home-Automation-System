@@ -60,6 +60,11 @@ button:hover {
   margin-bottom: 20px;
 }
 
+.header div button {
+  margin: 2px 5px;
+
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr 350px;

@@ -53,7 +53,7 @@ const AddDeviceModal = ({ onClose, onAdded }) => {
         />
 
         <button onClick={save}>Add Device</button>
-        <button onClick={onClose} style={{ marginTop: "10px" }}>Cancel</button>
+        <button onClick={onClose} style={{ margin: "10px 5px" }}>Cancel</button>
       </div>
     </div>
   );
