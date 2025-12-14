@@ -71,7 +71,6 @@ const AddDeviceModal = ({ onClose, onAdded }) => {
   const [name, setName] = useState("");
   const [type, setType] = useState("switch");
   const [topic, setTopic] = useState("");
-  const topicPrefix = "home/room/"; // Define your prefix here
 
   const save = async () => {
     const res = await authFetch("devices", {
