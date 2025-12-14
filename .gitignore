@@ -23,3 +23,6 @@
 
 ############ Backend
 /backend/app/.env
+
+/backend/database.db
+/backend/SELECT
