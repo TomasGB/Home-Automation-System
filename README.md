@@ -90,12 +90,6 @@ The system uses **JWT tokens**:
 | `home/sensor/data` | ESP32 → Backend/Frontend | `{ "temperature": X, "humidity": Y }` | Live sensor data |
 | `home/devices/id/state` | Backend → ESP32/Frontend | `{ "state": "on" }` | DEVICE state updates |
 
-
-The system now uses **a single unified LED topic**:  
-```
-home/led/state
-```
-
 ---
 
 # 🛠 Installation & Setup
