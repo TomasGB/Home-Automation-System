@@ -35,24 +35,21 @@ frontend/
 ├── src/
 │   ├── api/
 │   │   ├── auth.js
+│   │   ├── authFetch.js
+│   │   ├── config.js
 │   │   ├── devices.js
 │   │   └── sensors.js
 │   │
 │   ├── components/
-│   │   ├── Dashboard.jsx
-│   │   ├── LedControl.jsx
-│   │   └── SensorCard.jsx
+│   │   ├── AddDeviceModal.js
+│   │   ├── CurrentSensorData.js
+|   |   ├── Login.js
+|   |   ├── MqttListener.js
+|   |   ├── SensorGraph.js
+│   │   └── DeviceCard.js
 │   │
-│   ├── pages/
-│   │   ├── Login.jsx
-│   │   └── Home.jsx
-│   │
-│   ├── context/
-│   │   └── AuthContext.jsx
-│   │
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── config.js
+│   ├── styles.css
+│   └── App.js
 │
 ├── public/
 └── package.json

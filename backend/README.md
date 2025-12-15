@@ -17,12 +17,12 @@ The backend is responsible for:
 
 ### ✔ REST API
 Clean, versioned endpoints used by the frontend:
-
+```bash
 /api/v1/auth/login
 /api/v1/devices/led
 /api/v1/sensors/latest
 /api/v1/sensors/history
-
+```
 ---
 
 ### ✔ JWT Authentication
@@ -43,7 +43,7 @@ Clean, versioned endpoints used by the frontend:
 Persistent storage for:
 
 - Users
-- Devices (LED)
+- Devices (Lights, AC, TV)
 - Sensor readings (temperature & humidity)
 
 ---
