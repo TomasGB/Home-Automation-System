@@ -38,7 +38,7 @@ Provides REST API endpoints for:
 
 MQTT Messages:
 - Sensor data: `home/sensor/data`
-- LED state updates: `home/led/state`
+- DEVICES state updates: `home/devices/id/state`
 
 The backend both **subscribes** to these topics and **publishes** state changes.
 
@@ -65,7 +65,7 @@ Firmware responsibilities:
 
 - Read temperature & humidity
 - Publish sensor data to `home/sensor/data`
-- Subscribe to `home/led/state` to toggle LED
+- Subscribe to `home/devices/id/state` to toggle LED
 - Send readings at configurable intervals
 
 ---
@@ -88,8 +88,8 @@ The system uses **JWT tokens**:
 | Topic | Direction | Payload | Description |
 |-------|-----------|---------|-------------|
 | `home/sensor/data` | ESP32 → Backend/Frontend | `{ "temperature": X, "humidity": Y }` | Live sensor data |
-| `home/led/state` | Backend → ESP32/Frontend | `{ "status": "on" }` | LED state updates |
-| `home/led/control` | (deprecated) | — | Old topic, no longer used |
+| `home/devices/id/state` | Backend → ESP32/Frontend | `{ "state": "on" }` | DEVICE state updates |
+
 
 The system now uses **a single unified LED topic**:  
 ```
@@ -186,8 +186,9 @@ POST /api/v1/auth/register
 
 ### Devices
 ```
-GET  /api/v1/devices/led/status
-POST /api/v1/devices/led
+GET  /api/v1/devices
+POST /api/v1/devices
+POST /api/v1/devices/:id/state
 ```
 
 ### Sensors
@@ -208,7 +209,7 @@ Authorization: Bearer <token>
 
 ### ✅ Live sensor cards  
 ### ✅ Temperature/Humidity graph  
-### ❇ LED status indicator  
+### ❇ DEVICES status indicator  
 ### ⚡ Real-time updates via MQTT  
 ### 🔒 JWT session persistence  
 ### 🚪 Logout support  
@@ -233,7 +234,7 @@ Authorization: Bearer <token>
 
 ### IoT
 - ESP32 + MicroPython
-- DHT22 / DHT11 sensor
+- DHT11 sensor
 - MQTT
 
 ---

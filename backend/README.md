@@ -1,38 +1,47 @@
 # 🏠 Home Automation System – Backend (Flask + MQTT + SQLite)
 
-This is the backend API for the **Home Automation System**, responsible for:
+This is the backend API for the **Home Automation System**.  
+It acts as the central hub between the ESP32, the MQTT broker, and the frontend.
 
-- User authentication (JWT)
-- LED device control
-- Recording and serving sensor data
-- MQTT communication with the ESP32 and React frontend
-- SQLite database for persistent storage
+The backend is responsible for:
+
+- Receiving sensor data via MQTT
+- Storing sensor readings in SQLite
+- Exposing REST endpoints for the frontend
+- Handling LED device control
+- Synchronizing device state through MQTT
 
 ---
 
 # 🚀 Features
 
-### ✔ REST API  
-You can control devices and retrieve sensor data via clean, versioned endpoints:
+### ✔ REST API
+Clean, versioned endpoints used by the frontend:
 
-```
 /api/v1/auth/login
 /api/v1/devices/led
-/api/v1/sensor/latest
-/api/v1/sensor/history
-```
+/api/v1/sensors/latest
+/api/v1/sensors/history
 
-### ✔ JWT Authentication  
-Backend validates the JWT for protected routes.
+---
 
-### ✔ MQTT Integration  
-- Subscribes to ESP32 sensor topic  
-- Subscribes to LED state topic  
-- Publishes LED control updates  
-- Works with Mosquitto test broker
+### ✔ JWT Authentication
+- Login endpoint issues JWT tokens
+- Protected routes require `Authorization: Bearer <token>`
 
-### ✔ SQLite Database  
-Stores:
+---
+
+### ✔ MQTT Integration
+- Subscribes to ESP32 sensor data topic
+- Publishes LED control commands
+- Listens to LED state updates to keep frontend in sync
+- Uses Mosquitto test broker by default
+
+---
+
+### ✔ SQLite Database
+Persistent storage for:
+
 - Users
 - Devices (LED)
 - Sensor readings (temperature & humidity)
@@ -45,27 +54,27 @@ Stores:
 backend/
 │
 ├── app/
-│   ├── routes/
-│   │   ├── auth.py
-│   │   ├── devices.py
-│   │   └── sensor.py
-│   │
-│   ├── services/
-│   │   ├── auth_service.py
-│   │   ├── device_service.py
-│   │   ├── sensor_service.py
-│   │
-│   ├── models/
-│   │   ├── user_model.py
-│   │   ├── device_model.py
-│   │   └── sensor_model.py
-│   │
-│   ├── utils/
-│   │   └── auth_middleware.py
-│   │
-│   ├── mqtt_client.py
-│   ├── config.py
-│   ├── __init__.py
+│ ├── routes/
+│ │ ├── auth.py
+│ │ ├── devices.py
+│ │ └── sensors.py
+│ │
+│ ├── services/
+│ │ ├── auth_service.py
+│ │ ├── device_service.py
+│ │ └── sensor_service.py
+│ │
+│ ├── models/
+│ │ ├── user_model.py
+│ │ ├── device_model.py
+│ │ └── sensor_model.py
+│ │
+│ ├── utils/
+│ │ └── auth_middleware.py
+│ │
+│ ├── mqtt_client.py
+│ ├── config.py
+│ ├── init.py
 │
 ├── database.db
 ├── run.py
@@ -76,32 +85,57 @@ backend/
 
 # 🔌 MQTT Topics
 
-### Sensor data (ESP32 → Backend)
-```
-home/sensor/data
-```
-Example payload:
+### 📡 Sensor data (ESP32 → Backend)
+
+The backend:
+
+1. Receives the message via MQTT
+
+2. Parses the JSON payload
+
+3. Stores the data in SQLite
+
+
+Payload example:
 ```json
-{ "temperature": 25.3, "humidity": 60 }
+{
+  "temperature": 25.3,
+  "humidity": 60
+}
 ```
 
-### LED state updates (any → backend → frontend)
-```
-home/led/state
-```
+### 💡 DEVICE control (Backend → ESP32)
 
-Payload:
+`
+devices/id/state
+`
 ```json
-{ "status": "on" }
+{
+  "state": "on"
+}
 ```
 
----
+### 🔁 DEVICE state synchronization (ESP32 → Backend → Frontend)
 
-# 🔗 REST API Endpoints
+`
+devices/id/state
+`
+```json
+{
+  "state": "on"
+}
+```
 
-## Auth
+Keeps UI state aligned with the physical device.
 
-### **POST /api/v1/auth/login**
+### 🔗 REST API Endpoints
+
+### 🔐 Authentication
+
+`POST /api/v1/auth/login`
+
+Request:
+
 ```json
 {
   "username": "admin",
@@ -109,104 +143,134 @@ Payload:
 }
 ```
 
-Response (JWT):
+Response:
 
 ```json
-{ "token": "..." }
+{
+  "token": "JWT_TOKEN"
+}
 ```
 
----
+### 💡 DEVICES
 
-## LED Device
+`GET /api/v1/devices`
 
-### **GET /api/v1/devices/led/status**
-Requires JWT  
-Returns:
+Requires JWT
+
+Response:
+
 ```json
-{ "success": true, "data": { "state": "on" } }
+{
+  "success": true,
+  "data": {
+    "state": "on"
+  }
+}
 ```
 
-### **POST /api/v1/devices/led**
-Admin-only  
-Body:
+
+`POST /api/v1/id/state`
+
+Requires JWT
+
+Request:
+
 ```json
-{ "state": "on" }
+{
+  "state": "off"
+}
 ```
 
-Backend will:
-1. Update database  
-2. Publish to MQTT  
-3. Return new state  
+Backend behavior:
 
----
+1. Updates LED state in database
 
-## Sensor Data
+2. Publishes MQTT control message
 
-### **GET /api/v1/sensor/latest**
-Returns last stored sensor record.
+3. Returns updated state
 
-### **GET /api/v1/sensor/history**
-Returns the last N records for graphing.
+### 🌡 Sensor Data
 
----
+`GET /api/v1/sensors/latest`
 
-# 🛠 Running the Backend
+Returns the most recent sensor reading.
 
-### 1. Install dependencies
+Response:
+
+```json
+{
+  "temperature": 25.3,
+  "humidity": 60,
+  "timestamp": 14-12-2025 11:24
+}
 ```
+
+`GET /api/v1/sensors/history`
+
+Optional query parameters:
+
+```bash
+?limit=50
+```
+
+Returns historical sensor data for charts.
+
+### 🛠 Running the Backend
+
+### 1️⃣ Install dependencies
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Run Flask server
-```
+### 2️⃣ Start the server
+```bash
 python run.py
 ```
+Backend runs on:
 
-Default URL:
+```cpp
+http://127.0.0.1:5000
 ```
-http://localhost:5000
-```
+### ⚙️ Configuration
 
----
+Configured via the `Config` class:
 
-# ⚙️ Configuration
-
-Environment variables supported in `Config`:
-
-```
+```nginx
 DB_PATH
 MQTT_BROKER
 MQTT_PORT
 MQTT_TOPIC_SENSOR
-MQTT_TOPIC_LED
+MQTT_TOPIC_LED_CONTROL
+MQTT_TOPIC_LED_STATE
 SECRET_KEY
 JWT_SECRET
 ```
+Default MQTT broker:
 
-Default broker:
-```
+```makefile
 test.mosquitto.org:1883
 ```
 
----
+### 🧪 MQTT Manual Testing
 
-# 🧪 Testing MQTT Manually
+Publish DEVICE control command:
 
-Using MQTT Explorer or mosquitto_pub:
-
-```
-mosquitto_pub -h test.mosquitto.org -t home/led/state -m '{"status":"on"}'
+```bash
+mosquitto_pub -h test.mosquitto.org -t home/device_name/state -m '{"state":"on"}'
 ```
 
-Frontend updates instantly.
+Publish sensor data:
 
----
+```bash
+mosquitto_pub -h test.mosquitto.org -t home/sensor/data -m '{"temperature":24,"humidity":55}'
+```
 
-# 📘 Notes
+### 📘 Notes
 
-- Backend publishes LED updates **only** when the API endpoint is hit.
-- ESP32 reacts to MQTT messages from the same LED topic.
-- Backend listens to the **same LED topic** so UI stays in sync.
+* Backend reacts to MQTT messages, it does not poll
 
----
+* Frontend never connects directly to MQTT
 
+* All real-time communication flows through the backend
+
+* UI sensor values are fetched from `/api/v1/sensors/latest`
