@@ -14,6 +14,7 @@ import { authFetch } from "./api/authFetch";
 const App = () => {
   const [liveSensor, setLiveSensor] = useState(null);
   const [liveDevices, setLiveDevices] = useState(null);
+  const [editingDevice, setEditingDevice] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
 
   const [showAddDevice, setShowAddDevice] = useState(false);
@@ -57,13 +58,24 @@ const App = () => {
         </div>
       </div>
 
-      {/* Modal for adding devices */}
+      {/* Modal for adding/editing devices */}
+      
       {showAddDevice && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        }}>
         <AddDeviceModal
-          onClose={() => setShowAddDevice(false)}
+          device={editingDevice}
+          onClose={() => {
+            setShowAddDevice(false);
+            setEditingDevice(null);
+          }}
           onAdded={loadDevices}
         />
+        </div>
       )}
+
+
 
       {/* Main GRID */}
       <div className="grid">
@@ -80,6 +92,11 @@ const App = () => {
               key={dev.id}
               device={dev}
               liveUpdate={liveDevices}
+              onDeleted={loadDevices}
+              onEdit={(dev) => {
+                setEditingDevice(dev);
+                setShowAddDevice(true);
+              }}
             />
           ))}
         </div>

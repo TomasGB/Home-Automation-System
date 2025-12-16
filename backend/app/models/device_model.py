@@ -47,6 +47,46 @@ class DeviceModel:
             """, (name, dev_type, mqtt_topic))
     
     @staticmethod
+    def delete(device_id):
+        with sqlite3.connect(DB_PATH) as conn:
+            cur = conn.execute(
+                "DELETE FROM devices WHERE id = ?",
+                (device_id,)
+            )
+            return cur.rowcount > 0
+        
+    @staticmethod
+    def update(device_id, name=None, dev_type=None, mqtt_topic=None):
+        fields = []
+        values = []
+
+        if name:
+            fields.append("name = ?")
+            values.append(name)
+
+        if dev_type:
+            fields.append("type = ?")
+            values.append(dev_type)
+
+        if mqtt_topic:
+            fields.append("mqtt_topic = ?")
+            values.append(mqtt_topic)
+
+        if not fields:
+            return False
+
+        values.append(device_id)
+
+        with sqlite3.connect(DB_PATH) as conn:
+            cur = conn.execute(
+                f"UPDATE devices SET {', '.join(fields)} WHERE id = ?",
+                values
+            )
+            return cur.rowcount > 0
+
+
+    
+    @staticmethod
     def update_status(device_id, status):
         with sqlite3.connect(DB_PATH) as conn:
             cur = conn.execute(

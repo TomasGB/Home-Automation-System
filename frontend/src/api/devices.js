@@ -7,9 +7,24 @@ export function getDevices() {
 
 // POST /devices
 export function createDevice(device) {
-  return authFetch("/devices", {
+  return authFetch("devices", {
     method: "POST",
     body: JSON.stringify(device)
+  });
+}
+
+// DELETE /devices/:id
+export function deleteDevice(id) {
+  return authFetch(`devices/${id}`, {
+    method: "DELETE"
+  });
+}
+
+// PUT /devices/:id
+export function updateDevice(id, data) {
+  return authFetch(`devices/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data)
   });
 }
 

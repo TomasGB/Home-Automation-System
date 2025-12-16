@@ -54,3 +54,45 @@ def set_device_state(device_id):
         mqtt_client.publish(device["mqtt_topic"], json.dumps({"status": state}), retain=True)
 
     return jsonify({"success": True, "data": {"state": state}})
+
+@devices_bp.delete("/<int:device_id>")
+@require_auth(role="admin")
+def delete_device(device_id):
+    device = DeviceModel.get_by_id(device_id)
+
+    if not device:
+        return jsonify({
+            "success": False,
+            "error": "Device not found"
+        }), 404
+
+    DeviceModel.delete(device_id)
+
+    return jsonify({
+        "success": True,
+        "message": "Device deleted"
+    })
+
+@devices_bp.put("/<int:device_id>")
+@require_auth(role="admin")
+def update_device(device_id):
+    body = request.get_json() or {}
+
+    updated = DeviceModel.update(
+        device_id,
+        name=body.get("name"),
+        dev_type=body.get("type"),
+        mqtt_topic=body.get("mqtt_topic")
+    )
+
+    if not updated:
+        return jsonify({
+            "success": False,
+            "error": "Device not found"
+        }), 404
+
+    return jsonify({
+        "success": True,
+        "message": "Device updated"
+    })
+

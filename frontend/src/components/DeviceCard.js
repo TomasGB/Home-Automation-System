@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { setDeviceState } from "../api/devices";
+import { setDeviceState, deleteDevice, onDeleted } from "../api/devices";
 
-const DeviceCard = ({ device, liveUpdate }) => {
+const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
   const [state, setState] = useState(device.status);
 
   // Normalize LED/switch values
@@ -39,10 +39,19 @@ const DeviceCard = ({ device, liveUpdate }) => {
     }
   };
 
+  const remove = async () =>{
+    if (!window.confirm("Delete this device?")) return;
+    const res = await deleteDevice(device.id);
+    if (res.success) onDeleted();
+  }
+
   return (
     <div className="card" style={{ width: "280px", textAlign: "center", margin: "0px 0px 15px 0px"}}>
+      <div style={{margin: "0px 0px 0px 0px", display: "flex", gap: "70%", justifyContent: "center" }}>
+        <button style={{ backgroundColor:"white", fontSize:"20px"}} onClick={() => onEdit(device)}>✏️</button>
+        <button style={{ backgroundColor:"white", fontSize:"20px"}} onClick={remove}>🗑️</button>
+      </div>
       <h2>{device.name}</h2>
-
       <div
         className="value"
         style={{ color: state === "on" ? "green" : "red" }}
