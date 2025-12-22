@@ -4,14 +4,18 @@ import network
 from machine import Pin
 from config import (
     WIFI_SSID, WIFI_PASSWORD,
-    DHT_PIN, LED_PIN,
+    DHT_PIN, LED_PIN, IR_LED_PIN_RECEIVER,
     TOPIC_SENSOR, TOPIC_AC, TOPIC_TV,
     SENSOR_PUBLISH_INTERVAL, WIFI_CONNECT_TIMEOUT
 )
 from drivers.dht_drivers import DHTDriver
 from mqtt.mqtt_client import MQTTClientWrapper
 from drivers.IR_Blaster import IRBlaster
-from drivers.ir_codes import tv_on, tv_off, ac_on, ac_off
+from drivers.IR_receiver import IRReceiver
+from devices.tv import TV
+from devices.ac import AC
+import ujson
+
 
 # -------------------------
 # Hardware
@@ -20,6 +24,20 @@ led = Pin(LED_PIN, Pin.OUT)
 dht_drv = DHTDriver(DHT_PIN)
 
 ir = IRBlaster()
+ir_rx = IRReceiver(pin=IR_LED_PIN_RECEIVER)
+
+def load_codes(path):
+    with open(path) as f:
+        return ujson.load(f)
+
+tv_codes = load_codes("IR_codes/TV/bedroom_tv.json")
+ac_codes = load_codes("IR_codes/AC/bedroom_ac.json")
+
+devices = {
+    "tv": TV("tv", ir, tv_codes),
+    "ac": AC("ac", ir, ac_codes)
+}
+
 
 # -------------------------
 # State & Queue
@@ -94,13 +112,15 @@ def on_mqtt_message(topic, msg):
             return
 
         if state in ("on", "1"):
-            ir_queue.append((tv_on, "tv", "on"))
+            #ir_queue.append((tv_on, "tv", "on"))
+            ir_queue.append(("tv", "on"))
             device_state["tv"] = "on"
             last_tv_command_time = now
             print("TV -> ON queued")
 
         elif state in ("off", "0"):
-            ir_queue.append((tv_off, "tv", "off"))
+            #ir_queue.append((tv_off, "tv", "off"))
+            ir_queue.append(("tv", "off"))
             device_state["tv"] = "off"
             last_tv_command_time = now
             print("TV -> OFF queued")
@@ -116,13 +136,15 @@ def on_mqtt_message(topic, msg):
             return
 
         if state in ("on", "1"):
-            ir_queue.append((ac_on, "ac", "on"))
+            #ir_queue.append((ac_on, "ac", "on"))
+            ir_queue.append(("ac", "on"))
             device_state["ac"] = "on"
             last_ac_command_time = now
             print("AC -> ON queued")
 
         elif state in ("off", "0"):
-            ir_queue.append((ac_off, "ac", "off"))
+            #ir_queue.append((ac_off, "ac", "off"))
+            ir_queue.append(("ac", "off"))
             device_state["ac"] = "off"
             last_ac_command_time = now
             print("AC -> OFF queued")
@@ -180,6 +202,7 @@ def main():
             mqtt_client.check_msg()
 
             # ---- IR queue processing ----
+            """
             if ir_queue:
                 item = ir_queue.pop(0)
 
@@ -193,6 +216,16 @@ def main():
                     time.sleep(0.2)
                 else:
                     print("Invalid IR item:", item)
+            """
+            if ir_queue:
+                dev, state = ir_queue.pop(0)
+
+                if dev in devices:
+                    devices[dev].send(state)
+                    print(f"IR SENT: {dev} -> {state}")
+                    time.sleep(0.2)
+                else:
+                    print("Unknown device:", dev)
 
 
             # ---- Sensors ----
