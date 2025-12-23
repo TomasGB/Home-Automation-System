@@ -10,12 +10,12 @@ MQTT_CLIENT_ID_PREFIX = "esp32-mp-"
 
 
 # Topics (must match backend/frontend)
-TOPIC_SENSOR = b"mqtt-explorer-ba30a458/home/sensor/data"
-TOPIC_AC = b"mqtt-explorer-ba30a458/home/AC/state"
-TOPIC_TV = b"mqtt-explorer-ba30a458/home/TV/state"
+TOPIC_SENSOR = b"home/sensor/data"
+TOPIC_AC = b"home/AC/state"
+TOPIC_TV = b"home/TV/state"
 TOPIC_STATUS = b"home/device/status"
-LEARN_REQUEST_TOPIC = b"mqtt-explorer-ba30a458/home/ir/learn/request"
-LEARN_RESULT_TOPIC = b"mqtt-explorer-ba30a458/home/ir/learn/result"
+LEARN_REQUEST_TOPIC = b"home/ir/learn/request"
+LEARN_RESULT_TOPIC = b"home/ir/learn/result"
 
 
 # Hardware pins
