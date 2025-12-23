@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from app.services.device_service import DeviceService
 from app.models.device_model import DeviceModel
 from ..utils.auth_middleware import require_auth
+from app.config import Config
 
 
 devices_bp = Blueprint("devices", __name__)
@@ -96,3 +97,48 @@ def update_device(device_id):
         "message": "Device updated"
     })
 
+@devices_bp.route("/<int:device_id>/learn-action", methods=["POST", "OPTIONS"])
+@require_auth(role="admin")
+def learn_action(device_id):
+    from app.mqtt_client import mqtt_client
+    import json
+
+    # Preflight
+    if request.method == "OPTIONS":
+        return "", 200
+
+    data = request.get_json() or {}
+    action = data.get("action")
+
+    if not action:
+        return jsonify({
+            "success": False,
+            "error": "Missing action name"
+        }), 400
+
+    device = DeviceModel.get_by_id(device_id)
+
+    if not device:
+        return jsonify({
+            "success": False,
+            "error": "Device not found"
+        }), 404
+
+    if not device.get("mqtt_topic"):
+        return jsonify({
+            "success": False,
+            "error": "Device has no MQTT topic"
+        }), 400
+
+    mqtt_client.publish(
+    f"{Config.MQTT_BASE_TOPIC}/ir/learn/request",
+    json.dumps({
+        "device_id": device_id,
+        "action": action
+    })
+    )
+
+    return jsonify({
+        "success": True,
+        "message": "Learning mode started. Point the remote and press the button"
+    })

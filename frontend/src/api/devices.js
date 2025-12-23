@@ -35,3 +35,11 @@ export function setDeviceState(id, state) {
     body: JSON.stringify({ state })
   });
 }
+
+// POST /devices/:id/learn-action
+export function learnDeviceAction(id, action) {
+  return authFetch(`devices/${id}/learn-action`, {
+    method: "POST",
+    body: JSON.stringify({ action })
+  });
+}

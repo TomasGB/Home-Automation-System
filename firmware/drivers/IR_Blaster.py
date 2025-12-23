@@ -42,3 +42,4 @@ class IRBlaster:
 
             if i < repeats - 1:
                 time.sleep_ms(gap_ms)
+

@@ -130,13 +130,15 @@ class DeviceModel:
     @staticmethod
     def get_by_mqtt_topic(topic):
         with sqlite3.connect(DB_PATH) as conn:
+            conn.row_factory = sqlite3.Row
             cur = conn.cursor()
             cur.execute(
-                "SELECT * FROM devices WHERE mqtt_topic = ?",
+                "SELECT id, name, type, status, mqtt_topic FROM devices WHERE mqtt_topic = ?",
                 (topic,)
             )
             row = cur.fetchone()
             return dict(row) if row else None
+
 
 
 

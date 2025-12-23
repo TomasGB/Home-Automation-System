@@ -5,7 +5,7 @@ from machine import Pin
 from config import (
     WIFI_SSID, WIFI_PASSWORD,
     DHT_PIN, LED_PIN, IR_LED_PIN_RECEIVER,
-    TOPIC_SENSOR, TOPIC_AC, TOPIC_TV,
+    TOPIC_SENSOR, TOPIC_AC, TOPIC_TV, LEARN_REQUEST_TOPIC, LEARN_RESULT_TOPIC,
     SENSOR_PUBLISH_INTERVAL, WIFI_CONNECT_TIMEOUT
 )
 from drivers.dht_drivers import DHTDriver
@@ -25,6 +25,8 @@ dht_drv = DHTDriver(DHT_PIN)
 
 ir = IRBlaster()
 ir_rx = IRReceiver(pin=IR_LED_PIN_RECEIVER)
+
+learning_request = None
 
 def load_codes(path):
     with open(path) as f:
@@ -86,7 +88,7 @@ def connect_wifi(timeout=WIFI_CONNECT_TIMEOUT):
 # MQTT Message Handler
 # -------------------------
 def on_mqtt_message(topic, msg):
-    global last_tv_command_time, last_ac_command_time
+    global last_tv_command_time, last_ac_command_time, learning_request
 
     t = topic.decode() if isinstance(topic, bytes) else topic
     payload = msg.decode() if isinstance(msg, bytes) else msg
@@ -100,6 +102,14 @@ def on_mqtt_message(topic, msg):
         state = payload.lower().strip()
 
     now = time.time()
+
+    if t == (LEARN_REQUEST_TOPIC.decode() if isinstance(LEARN_REQUEST_TOPIC, bytes) else LEARN_REQUEST_TOPIC):
+        try:
+            data = json.loads(msg.decode())
+            learning_request = data
+            print("IR learning requested:", data)
+        except Exception as e:
+            print("Invalid learn request", e)
 
     # ---------- TV ----------
     if t == (TOPIC_TV.decode() if isinstance(TOPIC_TV, bytes) else TOPIC_TV):
@@ -161,6 +171,7 @@ def ensure_mqtt():
 
     mqtt_client.subscribe(TOPIC_TV)
     mqtt_client.subscribe(TOPIC_AC)
+    mqtt_client.subscribe(LEARN_REQUEST_TOPIC)
     print("MQTT subscribed")
 
     return True
@@ -185,6 +196,11 @@ def publish_sensor():
 # -------------------------
 def main():
     mqtt_client.on_message_cb = on_mqtt_message
+    
+    global learning_request
+    mqtt_client.on_message_cb = on_mqtt_message
+    
+    learning_request = None
 
     if not connect_wifi():
         print("Wi-Fi failed, rebooting")
@@ -201,22 +217,49 @@ def main():
         try:
             mqtt_client.check_msg()
 
-            # ---- IR queue processing ----
-            """
-            if ir_queue:
-                item = ir_queue.pop(0)
+            # ---- IR processing ----
+            
+            # ---- IR LEARNING MODE ----
+            if learning_request:
+                req = learning_request
+                learning_request = None
+                
+                device_id = req["device_id"]
+                action = req["action"]
 
-                if isinstance(item, tuple) and len(item) == 3:
-                    ir_cmd, dev, state = item
-                    if dev == "ac":
-                        ir.send(ir_cmd, repeats=3, gap_ms=180)
-                    else:
-                        ir.send(ir_cmd)
-                    print(f"IR SENT: {dev} -> {state}")
-                    time.sleep(0.2)
+                print("Learning IR for:", action)
+                #time.sleep(1.5)
+                print("👉 Point the remote and press the button NOW")
+                
+                led.value(1)
+                pulses = ir_rx.capture(timeout_us=1000000)
+                led.value(0)
+
+                if pulses:
+                    mqtt_client.publish(
+                        LEARN_RESULT_TOPIC,
+                        json.dumps({
+                            "device_id": device_id,
+                            "action": action,
+                            "protocol": "raw",
+                            "code": pulses
+                        })
+                    )
+                    print("IR code captured & sent")
                 else:
-                    print("Invalid IR item:", item)
-            """
+                    mqtt_client.publish(
+                        LEARN_RESULT_TOPIC,
+                        json.dumps({
+                            "device_id": device_id,
+                            "action": action,
+                            "error": "timeout"
+                        })
+                    )
+                    print("IR capture timeout")
+
+                learning_request = None
+                continue  
+
             if ir_queue:
                 dev, state = ir_queue.pop(0)
 
@@ -247,4 +290,5 @@ def main():
 # -------------------------
 if __name__ == "__main__":
     main()
+
 

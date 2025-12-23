@@ -24,7 +24,7 @@ def create_app():
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Authorization", "Content-Type"],
         }
-    })
+    }, supports_credentials=True)
 
     setup_logging(app)
     init_db()
@@ -33,6 +33,7 @@ def create_app():
     app.register_blueprint(sensors_bp, url_prefix="/api/v1/sensors")
     app.register_blueprint(devices_bp, url_prefix="/api/v1/devices")
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
+
     
     # Register global error handlers
     register_error_handlers(app)

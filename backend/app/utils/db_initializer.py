@@ -32,6 +32,19 @@ def init_db():
     )
     """)
 
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS device_actions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            device_id INTEGER NOT NULL,
+            action TEXT NOT NULL,
+            protocol TEXT NOT NULL,
+            code TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(device_id, action),
+            FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+        )
+    """)
+
     # -----------------------------------------------------
     # USERS
     # -----------------------------------------------------

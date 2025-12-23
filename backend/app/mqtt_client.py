@@ -6,6 +6,7 @@ import logging
 from app.config import Config
 from app.services.sensor_service import SensorService
 from app.models.device_model import DeviceModel
+from app.models.device_action_model import DeviceActionModel
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ BASE = Config.MQTT_BASE_TOPIC
 
 SENSOR_TOPIC = f"{BASE}/sensor/data"
 DEVICE_WILDCARD = f"{BASE}/+/state"
-
+LEARN_RESULT_TOPIC = f"{BASE}/ir/learn/result"
 
 
 class MQTTClientWrapper:
@@ -30,7 +31,8 @@ class MQTTClientWrapper:
         # Subscribe to sensor + ALL devices
         self.topics = [
             (SENSOR_TOPIC, 0),
-            (DEVICE_WILDCARD, 0)
+            (DEVICE_WILDCARD, 0),
+            (LEARN_RESULT_TOPIC, 0),
         ]
 
         self.client.on_connect = self.on_connect
@@ -54,6 +56,7 @@ class MQTTClientWrapper:
     # MQTT MESSAGE
     # ----------------------------------------------------------
     def on_message(self, client, userdata, message):
+
         raw = message.payload.decode()
         topic = message.topic
 
@@ -63,11 +66,27 @@ class MQTTClientWrapper:
             parsed = json.loads(raw)
         except Exception:
             parsed = raw.strip().lower()
+        
+        # ------------------------------
+        # IR LEARN RESULT
+        # ------------------------------
+        if topic == LEARN_RESULT_TOPIC:
+            try:
+                if not isinstance(parsed, dict):
+                    logger.error("Invalid learn result payload format")
+                    return
 
+                self.handle_learn_result(parsed)
+                return
+
+            except Exception as e:
+                logger.exception("❌ Learn result error", exc_info=e)
+
+            return
         # ------------------------------
         # SENSOR DATA
         # ------------------------------
-        if topic == SENSOR_TOPIC:
+        elif topic == SENSOR_TOPIC:
             try:
                 if isinstance(parsed, dict) and \
                    "temperature" in parsed and \
@@ -85,11 +104,10 @@ class MQTTClientWrapper:
                 logger.exception("❌ Sensor MQTT error", exc_info=e)
 
             return
-
         # ------------------------------
         # GENERIC DEVICE STATE
         # ------------------------------
-        elif topic == DEVICE_WILDCARD:
+        elif topic.startswith(f"{BASE}/") and topic.endswith("/state"):
             try:
                 if isinstance(parsed, dict):
                     value = parsed.get("state") or parsed.get("status")
@@ -148,10 +166,53 @@ class MQTTClientWrapper:
     # ----------------------------------------------------------
     def publish(self, topic, payload, qos=0, retain=True):
         try:
+            if topic == LEARN_RESULT_TOPIC:
+                retain=False
+                
             logger.info(f"📤 Publishing → {topic}: {payload}")
             self.client.publish(topic, payload, qos=qos, retain=retain)
         except Exception as e:
             logger.exception("❌ MQTT publish failed", exc_info=e)
+
+    # ----------------------------------------------------------
+    # LEARN IR CODE
+    # ----------------------------------------------------------
+
+    def handle_learn_result(self, data):
+        """
+        Expected payload:
+        {
+          device_id: int,
+          action: str,
+          protocol: str,
+          code: list
+        }
+        """
+        logger.info(f"🧠 Handling IR learn result: {data}")
+
+        if data.get("error"):
+            logger.warning(f"IR learn failed: {data}")
+            return
+
+        device_id = data.get("device_id")
+        action = data.get("action")
+        protocol = data.get("protocol")
+        code = data.get("code")
+
+        if not all([device_id, action, protocol, code]):
+            logger.error("Invalid learn result payload")
+            return
+
+        DeviceActionModel.create(
+            device_id=device_id,
+            action=action,
+            protocol=protocol,
+            code=json.dumps(code)
+        )
+
+        logger.info(
+            f"Saved IR action '{action}' for device {device_id}"
+        )
 
 
 mqtt_client = MQTTClientWrapper()
