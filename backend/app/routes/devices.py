@@ -4,6 +4,7 @@ from app.models.device_model import DeviceModel
 from app.models.device_action_model import DeviceActionModel
 from ..utils.auth_middleware import require_auth
 from app.config import Config
+from app.mqtt_client import mqtt_client
 
 
 devices_bp = Blueprint("devices", __name__)
@@ -34,7 +35,7 @@ def create_device():
 @devices_bp.post("/<int:device_id>/state")
 @require_auth(role="admin")
 def set_device_state(device_id):
-    from app.mqtt_client import mqtt_client
+    #from app.mqtt_client import mqtt_client
     import json
 
     body = request.get_json() or {}
@@ -101,7 +102,7 @@ def update_device(device_id):
 @devices_bp.route("/<int:device_id>/learn-action", methods=["POST", "OPTIONS"])
 @require_auth(role="admin")
 def learn_action(device_id):
-    from app.mqtt_client import mqtt_client
+    #from app.mqtt_client import mqtt_client
     import json
 
     # Preflight
@@ -170,7 +171,7 @@ def get_device_actions(device_id):
 @devices_bp.route("/<int:device_id>/actions/<action>/trigger", methods=["POST"])
 @require_auth()
 def trigger_action(device_id, action):
-    from app.mqtt_client import mqtt_client
+    #from app.mqtt_client import mqtt_client
 
     mqtt_client.publish_ir_action(device_id, action)
 
