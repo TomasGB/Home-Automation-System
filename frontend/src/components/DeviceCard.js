@@ -8,7 +8,7 @@ import {
 } from "../api/devices";
 
 const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
-  const [state, setState] = useState(device.status);
+  const [state, setState] = useState(device.status ?? "unknown");
   const [learning, setLearning] = useState(false);
   const [actionName, setActionName] = useState("");
   const [learningStatus, setLearningStatus] = useState("idle");
@@ -28,6 +28,14 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
     if (["off", "0", "false"].includes(v)) return "off";
     return null;
   };
+
+  // Set updated device status
+  useEffect(() => {
+    if (device.status) {
+      setState(device.status);
+    }
+  }, [device.status]);
+
 
   // Apply live MQTT updates
   useEffect(() => {

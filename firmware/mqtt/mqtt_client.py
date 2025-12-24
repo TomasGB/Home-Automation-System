@@ -1,10 +1,9 @@
 # mqtt/mqtt_client.py
-import time
 import ubinascii
 import machine
 import json
 from umqtt.simple import MQTTClient
-from config import MQTT_BROKER, MQTT_PORT, MQTT_CLIENT_ID_PREFIX, TOPIC_AC, TOPIC_TV, TOPIC_STATUS
+from config import MQTT_BROKER, MQTT_PORT, MQTT_CLIENT_ID_PREFIX,  TOPIC_STATUS
 
 class MQTTClientWrapper:
     def __init__(self, on_message_cb=None):

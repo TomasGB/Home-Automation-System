@@ -164,7 +164,7 @@ class MQTTClientWrapper:
     # ----------------------------------------------------------
     # PUBLISH
     # ----------------------------------------------------------
-    def publish(self, topic, payload, qos=0, retain=True):
+    def publish(self, topic, payload, qos=0, retain=False):
         try:
             if topic == LEARN_RESULT_TOPIC or topic==IR_SEND_TOPIC:
                 logger.info(f"📤 Publishing → {topic}: {payload}")

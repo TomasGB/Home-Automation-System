@@ -13,12 +13,11 @@ import { authFetch } from "./api/authFetch";
 
 const App = () => {
   const [liveSensor, setLiveSensor] = useState(null);
+  const [devices, setDevices] = useState([]);
   const [liveDevices, setLiveDevices] = useState(null);
+  const [showAddDevice, setShowAddDevice] = useState(false);
   const [editingDevice, setEditingDevice] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
-
-  const [showAddDevice, setShowAddDevice] = useState(false);
-  const [devices, setDevices] = useState([]);
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -30,11 +29,14 @@ const App = () => {
     const res = await authFetch("devices");
     if (res.success) setDevices(res.data);
   };
-
-
+  
+  
   useEffect(() => {
-    loadDevices();
-  }, []);
+    if (token) {
+      loadDevices();
+    }
+  }, [token]);
+
 
   // Login screen
   if (!token) {
