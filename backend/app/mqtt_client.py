@@ -16,7 +16,7 @@ BASE = Config.MQTT_BASE_TOPIC
 SENSOR_TOPIC = f"{BASE}/sensor/data"
 DEVICE_WILDCARD = f"{BASE}/+/state"
 LEARN_RESULT_TOPIC = f"{BASE}/ir/learn/result"
-
+IR_SEND_TOPIC = f"{BASE}/ir/send"
 
 class MQTTClientWrapper:
 
@@ -166,11 +166,12 @@ class MQTTClientWrapper:
     # ----------------------------------------------------------
     def publish(self, topic, payload, qos=0, retain=True):
         try:
-            if topic == LEARN_RESULT_TOPIC:
-                retain=False
-                
-            logger.info(f"📤 Publishing → {topic}: {payload}")
-            self.client.publish(topic, payload, qos=qos, retain=retain)
+            if topic == LEARN_RESULT_TOPIC or topic==IR_SEND_TOPIC:
+                logger.info(f"📤 Publishing → {topic}: {payload}")
+                self.client.publish(topic, payload, qos=qos, retain=False)
+            else:
+                logger.info(f"📤 Publishing → {topic}: {payload}")
+                self.client.publish(topic, payload, qos=qos, retain=retain)
         except Exception as e:
             logger.exception("❌ MQTT publish failed", exc_info=e)
 
@@ -213,6 +214,21 @@ class MQTTClientWrapper:
         logger.info(
             f"Saved IR action '{action}' for device {device_id}"
         )
+
+    def publish_ir_action(self, device_id, action):
+        action_data = DeviceActionModel.get(device_id, action)
+
+        if not action_data:
+            raise ValueError("Action not found")
+
+        payload = {
+            "device_id": device_id,
+            "action": action,
+            "protocol": action_data["protocol"],
+            "code": action_data["code"]
+        }
+
+        mqtt_client.publish(IR_SEND_TOPIC, json.dumps(payload))
 
 
 mqtt_client = MQTTClientWrapper()

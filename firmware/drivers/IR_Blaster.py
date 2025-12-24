@@ -42,4 +42,25 @@ class IRBlaster:
 
             if i < repeats - 1:
                 time.sleep_ms(gap_ms)
+                
+    def send_raw(self, code, repeats=1, gap_ms=150):
+        """
+        Wrapper for RAW IR sending
+        """
+        self._init_pwm()
+
+        for i in range(repeats):
+            for level, duration in code:
+                if level == 1:
+                    self._on()
+                else:
+                    self._off()
+                time.sleep_us(duration)
+
+            self._off()
+
+            if i < repeats - 1:
+                time.sleep_ms(gap_ms)
+        self.send(code, repeats=repeats, gap_ms=gap_ms)
+
 

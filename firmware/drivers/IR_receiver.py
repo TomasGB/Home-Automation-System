@@ -10,7 +10,7 @@ class IRReceiver:
     def __init__(self, pin):
         self.pin = Pin(pin, Pin.IN)
 
-    def capture(self, timeout_us=600_000):
+    def capture(self, timeout_us=2000000_000):
         """
         Waits for IR activity and captures pulses.
         Returns list of (level, duration_us)

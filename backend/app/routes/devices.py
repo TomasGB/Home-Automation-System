@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from app.services.device_service import DeviceService
 from app.models.device_model import DeviceModel
+from app.models.device_action_model import DeviceActionModel
 from ..utils.auth_middleware import require_auth
 from app.config import Config
 
@@ -141,4 +142,38 @@ def learn_action(device_id):
     return jsonify({
         "success": True,
         "message": "Learning mode started. Point the remote and press the button"
+    })
+
+@devices_bp.route("/<int:device_id>/actions", methods=["GET"])
+@require_auth()
+def get_device_actions(device_id):
+    #actions = DeviceActionModel.get_by_device(device_id=device_id)
+
+    try:
+        actions = DeviceActionModel.get_by_device(device_id)
+
+        return jsonify({
+            "success": True,
+            "data": [
+                {
+                    "action": a["action"]
+                } for a in actions
+            ]
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@devices_bp.route("/<int:device_id>/actions/<action>/trigger", methods=["POST"])
+@require_auth()
+def trigger_action(device_id, action):
+    from app.mqtt_client import mqtt_client
+
+    mqtt_client.publish_ir_action(device_id, action)
+
+    return jsonify({
+        "success": True
     })

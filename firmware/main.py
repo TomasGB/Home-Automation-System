@@ -5,7 +5,7 @@ from machine import Pin
 from config import (
     WIFI_SSID, WIFI_PASSWORD,
     DHT_PIN, LED_PIN, IR_LED_PIN_RECEIVER,
-    TOPIC_SENSOR, TOPIC_AC, TOPIC_TV, LEARN_REQUEST_TOPIC, LEARN_RESULT_TOPIC,
+    TOPIC_SENSOR, TOPIC_AC, TOPIC_TV, LEARN_REQUEST_TOPIC, LEARN_RESULT_TOPIC, IR_SEND_TOPIC,
     SENSOR_PUBLISH_INTERVAL, WIFI_CONNECT_TIMEOUT
 )
 from drivers.dht_drivers import DHTDriver
@@ -110,6 +110,31 @@ def on_mqtt_message(topic, msg):
             print("IR learning requested:", data)
         except Exception as e:
             print("Invalid learn request", e)
+    
+        # ---------- IR SEND (RAW) ----------
+    if t == (IR_SEND_TOPIC.decode() if isinstance(IR_SEND_TOPIC, bytes) else IR_SEND_TOPIC):
+        try:
+            data = json.loads(payload)
+
+            protocol = data.get("protocol")
+            code = data.get("code")
+
+            if protocol != "raw" or not code:
+                print("Invalid IR send payload")
+                return
+
+            # Code may arrive as string → parse
+            if isinstance(code, str):
+                code = json.loads(code)
+
+            ir_queue.append(("raw", code))
+            print("RAW IR queued")
+
+        except Exception as e:
+            print("Failed to queue IR send:", e)
+
+        return
+
 
     # ---------- TV ----------
     if t == (TOPIC_TV.decode() if isinstance(TOPIC_TV, bytes) else TOPIC_TV):
@@ -122,14 +147,12 @@ def on_mqtt_message(topic, msg):
             return
 
         if state in ("on", "1"):
-            #ir_queue.append((tv_on, "tv", "on"))
             ir_queue.append(("tv", "on"))
             device_state["tv"] = "on"
             last_tv_command_time = now
             print("TV -> ON queued")
 
         elif state in ("off", "0"):
-            #ir_queue.append((tv_off, "tv", "off"))
             ir_queue.append(("tv", "off"))
             device_state["tv"] = "off"
             last_tv_command_time = now
@@ -172,6 +195,8 @@ def ensure_mqtt():
     mqtt_client.subscribe(TOPIC_TV)
     mqtt_client.subscribe(TOPIC_AC)
     mqtt_client.subscribe(LEARN_REQUEST_TOPIC)
+    mqtt_client.subscribe(IR_SEND_TOPIC)
+
     print("MQTT subscribed")
 
     return True
@@ -232,7 +257,7 @@ def main():
                 print("👉 Point the remote and press the button NOW")
                 
                 led.value(1)
-                pulses = ir_rx.capture(timeout_us=1000000)
+                pulses = ir_rx.capture(timeout_us=2000000)
                 led.value(0)
 
                 if pulses:
@@ -261,14 +286,21 @@ def main():
                 continue  
 
             if ir_queue:
-                dev, state = ir_queue.pop(0)
+                kind, payload = ir_queue.pop(0)
 
-                if dev in devices:
-                    devices[dev].send(state)
-                    print(f"IR SENT: {dev} -> {state}")
+                if kind == "raw":
+                    print("Sending RAW IR")
+                    ir.send_raw(payload)
                     time.sleep(0.2)
+
+                elif kind in devices:
+                    devices[kind].send(payload)
+                    print(f"IR SENT: {kind} -> {payload}")
+                    time.sleep(0.2)
+
                 else:
-                    print("Unknown device:", dev)
+                    print("Unknown IR queue item:", kind)
+
 
 
             # ---- Sensors ----

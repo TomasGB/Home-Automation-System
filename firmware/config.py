@@ -16,7 +16,7 @@ TOPIC_TV = b"home/TV/state"
 TOPIC_STATUS = b"home/device/status"
 LEARN_REQUEST_TOPIC = b"home/ir/learn/request"
 LEARN_RESULT_TOPIC = b"home/ir/learn/result"
-
+IR_SEND_TOPIC = b"home/ir/send"
 
 # Hardware pins
 LED_PIN = 32        # change if your LED is on a different pin

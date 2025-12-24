@@ -43,3 +43,15 @@ export function learnDeviceAction(id, action) {
     body: JSON.stringify({ action })
   });
 }
+
+// GET /devices/:id/actions
+export function getDeviceActions(id) {
+  return authFetch(`devices/${id}/actions`);
+}
+
+// POST /devices/:id/actions/:action/trigger
+export function triggerDeviceAction(id, action) {
+  return authFetch(`devices/${id}/actions/${action}/trigger`, {
+    method: "POST"
+  });
+}

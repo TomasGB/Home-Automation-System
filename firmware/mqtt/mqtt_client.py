@@ -16,17 +16,17 @@ class MQTTClientWrapper:
         self.connected = False
 
     def _internal_cb(self, topic, msg):
-        # Ensure bytes -> pass to callback if present
         try:
             if self.on_message_cb:
                 self.on_message_cb(topic, msg)
         except Exception as e:
             print("MQTT cb error:", e)
 
+
     def connect(self):
         """Create client and connect. Returns True on success."""
         try:
-            self.client = MQTTClient(self.client_id, MQTT_BROKER, port=MQTT_PORT, keepalive=60)
+            self.client = MQTTClient(self.client_id,MQTT_BROKER,port=MQTT_PORT,keepalive=60)
             self.client.set_callback(self._internal_cb)
             self.client.connect()
             self.connected = True
@@ -62,14 +62,14 @@ class MQTTClientWrapper:
             self.connected = False
             self.client = None
 
-    def publish(self, topic, payload, retain=True):
+    def publish(self, topic, payload, retain=False):
         if not self.connected or not self.client:
             print("MQTT publish: client not connected")
             return False
         try:
             if isinstance(payload, str):
                 payload = payload.encode()
-            self.client.publish(topic, payload)
+            self.client.publish(topic, payload, retain=retain)
             return True
         except Exception as e:
             print("MQTT publish failed:", e)
@@ -83,3 +83,4 @@ class MQTTClientWrapper:
             pass
         self.connected = False
         self.client = None
+

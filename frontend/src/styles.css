@@ -116,6 +116,53 @@ button:hover {
   margin-bottom: 15px;
 }
 
+.status-container {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.status-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.status-dot.on {
+  background-color: #2ecc71; /* green */
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.8);
+}
+
+.status-dot.off {
+  background-color: #e74c3c; /* red */
+  box-shadow: 0 0 6px rgba(231, 76, 60, 0.8);
+}
+
+.learn-panel {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.learn-message {
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+
+.learn-message.listening {
+  color: #f1c40f;
+}
+
+.learn-message.success {
+  color: #2ecc71;
+}
+
+.learn-message.error {
+  color: #e74c3c;
+}
+
 
 /* -------------------------------------------
    🔥 RESPONSIVE BREAKPOINTS

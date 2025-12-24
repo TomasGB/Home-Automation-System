@@ -1,127 +1,24 @@
-/*
-import React, { useState, useEffect } from "react";
-import { setDeviceState, deleteDevice, onDeleted, learnDeviceAction  } from "../api/devices";
-
-const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
-  const [state, setState] = useState(device.status);
-  const [learning, setLearning] = useState(false);
-  const [actionName, setActionName] = useState("");
-
-  // Normalize LED/switch values
-  const normalize = (v) => {
-    if (!v) return null;
-    v = String(v).trim().toLowerCase();
-    if (["on", "1", "true"].includes(v)) return "on";
-    if (["off", "0", "false"].includes(v)) return "off";
-    return null;
-  };
-
-  // Apply live MQTT updates
-  useEffect(() => {
-    if (!liveUpdate) return;
-
-    const raw =
-      liveUpdate?.status ??
-      liveUpdate?.state ??
-      liveUpdate?.raw ??
-      liveUpdate;
-
-    const normalized = normalize(raw);
-    if (normalized) setState(normalized);
-  }, [liveUpdate]);
-
-  // Toggle device state
-  const toggle = async () => {
-    const next = state === "on" ? "off" : "on";
-    const res = await setDeviceState(device.id, next);
-
-    if (res.success) {
-      setState(next);
-    } else {
-      console.error("Failed to toggle:", res.error);
-    }
-  };
-
-  const remove = async () =>{
-    if (!window.confirm("Delete this device?")) return;
-    const res = await deleteDevice(device.id);
-    if (res.success) onDeleted();
-  }
-
-  const startLearning = async () => {
-    if (!actionName) return;
-
-    try {
-      await api.post(`/devices/${device.id}/learn-action`, {
-        action: actionName
-      });
-
-      alert("Point the remote and press the button");
-      setLearning(false);
-      setActionName("");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to start learning");
-    }
-  };
-  
-  return (
-    <div className="card" style={{ width: "280px", textAlign: "center", margin: "0px 0px 15px 0px"}}>
-      <div style={{margin: "0px 0px 0px 0px", display: "flex", gap: "70%", justifyContent: "center" }}>
-        <button style={{ backgroundColor:"white", fontSize:"20px"}} onClick={() => onEdit(device)}>✏️</button>
-        <button style={{ backgroundColor:"white", fontSize:"20px"}} onClick={() => setLearning(true)}>
-          Learn new action
-        </button>
-        {
-          learning && (
-          <div className="learn-panel">
-            <input
-              placeholder="Action name (e.g. volume_up)"
-              value={actionName}
-              onChange={(e) => setActionName(e.target.value)}
-            />
-
-            <button onClick={startLearning}>
-              Start learning
-            </button>
-
-            <button onClick={() => setLearning(false)}>
-              Cancel
-            </button>
-          </div>)
-        }
-        <button style={{ backgroundColor:"white", fontSize:"20px"}} onClick={remove}>🗑️</button>
-      </div>
-      <h2>{device.name}</h2>
-      <div
-        className="value"
-        style={{ color: state === "on" ? "green" : "red" }}
-      >
-        {state.toUpperCase()}
-      </div>
-
-      <button onClick={toggle}>
-        Turn {state === "on" ? "OFF" : "ON"}
-      </button>
-    </div>
-  );
-};
-
-export default DeviceCard;
-
-*/
-
 import React, { useState, useEffect } from "react";
 import {
   setDeviceState,
   deleteDevice,
-  learnDeviceAction
+  learnDeviceAction,
+  getDeviceActions,
+  triggerDeviceAction
 } from "../api/devices";
 
 const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
   const [state, setState] = useState(device.status);
   const [learning, setLearning] = useState(false);
   const [actionName, setActionName] = useState("");
+  const [learningStatus, setLearningStatus] = useState("idle");
+  // idle | listening | success | error
+  const [learningMessage, setLearningMessage] = useState("");
+  const [actions, setActions] = useState([]);
+  const [selectedAction, setSelectedAction] = useState("");
+  const [actionStatus, setActionStatus] = useState("");
+
+
 
   // Normalize LED/switch values
   const normalize = (v) => {
@@ -145,6 +42,45 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
     const normalized = normalize(raw);
     if (normalized) setState(normalized);
   }, [liveUpdate]);
+
+  // load actions on mount
+  useEffect(() => {
+    const loadActions = async () => {
+      try {
+        const res = await getDeviceActions(device.id);
+        if (res.success) {
+          setActions(res.data);
+        }
+      } catch (e) {
+        console.error("Failed to load actions", e);
+      }
+    };
+
+    loadActions();
+  }, [device.id]);
+
+  const triggerAction = async () => {
+    if (!selectedAction) return;
+
+    setActionStatus("Sending IR command...");
+
+    try {
+      const res = await triggerDeviceAction(device.id, selectedAction);
+
+      if (res.success) {
+        setActionStatus("Action sent successfully");
+      } else {
+        setActionStatus("Failed to send action");
+      }
+    } catch (e) {
+      console.error(e);
+      setActionStatus("ESP32 not responding");
+    }
+
+    setTimeout(() => setActionStatus(""), 2000);
+    setSelectedAction("");
+  };
+
 
   // Toggle device state
   const toggle = async () => {
@@ -165,25 +101,53 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
   };
 
   // ✅ Correct learning handler
+  const resetLearningUI = () => {
+    setLearning(false);
+    setLearningStatus("idle");
+    setLearningMessage("");
+    setActionName("");
+  };
+
+  const prepareLearning = () => {
+    if (!actionName.trim()) return;
+
+    setLearningStatus("ready");
+    setLearningMessage("Get the remote ready, then click START");
+  };
+
+
   const startLearning = async () => {
   if (!actionName) return;
 
   try {
-    await learnDeviceAction(device.id, actionName);
+    const res = await learnDeviceAction(device.id, actionName);
 
     alert(
       "Learning mode started.\n\n" +
       "👉 Point the remote at the ESP32\n" +
       "👉 Press the button ONCE\n" +
-      "👉 Wait a few seconds"
+      "👉 Wait a few seconds\n" +
+      "👉 Then click Ok"
     );
-  } catch (err) {
-    console.error(err);
-    alert("Failed to start learning");
-  }
+
+    if (res?.success !== false) {
+        setLearningStatus("success");
+        setLearningMessage("IR action learned successfully");
+      } else {
+        setLearningStatus("error");
+        setLearningMessage("Failed to learn IR action");
+      }
+    } catch (err) {
+      console.error(err);
+      setLearningStatus("error");
+      setLearningMessage("Timeout or communication error");
+    }
+
+    setTimeout(resetLearningUI, 2500);
+  //}
   setActionName("");
   setLearning(false);
-};
+  };
 
 
   return (
@@ -206,37 +170,97 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
 
         <button onClick={remove}>🗑️</button>
       </div>
-
       {learning && (
         <div className="learn-panel">
-          <input style={{ margin: "5px", textAlign: "center" }}
+
+          <input
             placeholder="Action name (e.g. volume_up)"
             value={actionName}
             onChange={(e) => setActionName(e.target.value)}
+            disabled={learningStatus === "listening"}
           />
 
-          <button style={{ margin: "5px"}} onClick={startLearning}>
-            Start learning
-          </button>
+          {learningStatus === "idle" && (
+            <button onClick={prepareLearning}>
+              Prepare
+            </button>
+          )}
 
-          <button style={{ margin: "5px"}} onClick={() => setLearning(false)}>
+          {learningStatus === "ready" && (
+            <button onClick={startLearning}>
+              START
+            </button>
+          )}
+
+          {learningStatus === "listening" && (
+            <div style={{ color: "orange", fontWeight: "bold" }}>
+              ⏺ Listening…
+            </div>
+          )}
+
+          {learningStatus === "success" && (
+            <div style={{ color: "green" }}>
+              ✅ {learningMessage}
+            </div>
+          )}
+
+          {learningStatus === "error" && (
+            <div style={{ color: "red" }}>
+              ❌ {learningMessage}
+            </div>
+          )}
+
+          <button
+            onClick={resetLearningUI}
+            disabled={learningStatus === "listening"}
+          >
             Cancel
           </button>
+
         </div>
       )}
 
       <h2>{device.name}</h2>
 
-      <div
-        className="value"
-        style={{ color: state === "on" ? "green" : "red" }}
-      >
-        {state?.toUpperCase()}
+      <div className="status-container">
+        <div
+          className={`status-dot ${state === "on" ? "on" : "off"}`}
+          title={state}
+        />
       </div>
 
       <button onClick={toggle}>
         Turn {state === "on" ? "OFF" : "ON"}
       </button>
+      <div style={{ marginTop: "10px" }}>
+      <select
+        value={selectedAction}
+        onChange={(e) => setSelectedAction(e.target.value)}
+        style={{ width: "100%", padding: "6px" }}
+      >
+        <option value="">Select action</option>
+        {actions.map((a) => (
+          <option key={a.action} value={a.action}>
+            {a.action}
+          </option>
+        ))}
+      </select>
+
+      <button
+        onClick={triggerAction}
+        disabled={!selectedAction}
+        style={{ marginTop: "8px", width: "100%" }}
+      >
+        Trigger
+      </button>
+
+      {actionStatus && (
+        <div style={{ marginTop: "6px", fontSize: "0.85rem" }}>
+          {actionStatus}
+        </div>
+      )}
+    </div>
+
     </div>
   );
 };
