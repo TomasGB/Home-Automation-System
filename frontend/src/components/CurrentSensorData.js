@@ -55,7 +55,7 @@ const CurrentSensorData = ({ liveData }) => {
   };
 
   return (
-    <div className="card" style={{ textAlign: "center", padding: "20px" }}>
+    <div className="card" style={{ textAlign: "center", padding: "15px" }}>
       <h2>Current Sensor Data</h2>
 
       {!latest ? (
@@ -68,7 +68,7 @@ const CurrentSensorData = ({ liveData }) => {
               display: "flex",
               justifyContent: "space-around",
               fontWeight: "700",
-              marginTop: "10px",
+              marginTop: "5px",
               marginBottom: "5px",
               fontSize: "18px",
             }}

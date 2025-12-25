@@ -163,6 +163,33 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
       className="card"
       style={{ width: "280px", textAlign: "center", marginBottom: "15px" }}
     >
+      
+      <div className="status-container">
+        <h2 style={{ margin: "4px 0px 10px 0px", fontSize: "1.2rem" }}>
+        {device.name}
+        </h2>
+        <div
+          className={`status-dot ${state === "on" ? "on" : "off"}`}
+          title={state}
+        />
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "8px"
+        }}
+      >
+        
+
+        <div style={{ display: "flex", gap: "6px" }}>
+          <button onClick={() => onEdit(device)}>✏️</button>
+          <button onClick={() => setLearning(true)}>New Action ✨</button>
+          <button onClick={remove}>🗑️</button>
+        </div>
+      </div>
+      {/*
       <div
         style={{
           display: "flex",
@@ -177,7 +204,7 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
         </button>
 
         <button onClick={remove}>🗑️</button>
-      </div>
+      </div>*/} 
       {learning && (
         <div className="learn-panel">
 
@@ -228,19 +255,50 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
         </div>
       )}
 
-      <h2>{device.name}</h2>
-
-      <div className="status-container">
-        <div
-          className={`status-dot ${state === "on" ? "on" : "off"}`}
-          title={state}
-        />
-      </div>
-
+      
+      {/*
       <button onClick={toggle}>
         Turn {state === "on" ? "OFF" : "ON"}
+      </button>*/}
+      <button
+        onClick={toggle}
+        style={{
+          background: state === "on" ? "var(--danger)" : "var(--success)",
+          width: "100%",
+          marginTop: "8px"
+        }}
+      >
+        {state === "on" ? "Power Off" : "Power On"}
       </button>
+
       <div style={{ marginTop: "10px" }}>
+        <div style={{ marginTop: "14px" }}>
+          <label style={{ fontSize: "0.75rem", color: "#9ca3af" }}>
+            IR Action
+          </label>
+
+          <select
+            value={selectedAction}
+            onChange={(e) => setSelectedAction(e.target.value)}
+          >
+            <option value="">Select action</option>
+            {actions.map((a) => (
+              <option key={a.action} value={a.action}>
+                {a.action}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={triggerAction}
+            disabled={!selectedAction}
+            style={{ marginTop: "8px", width: "100%" }}
+          >
+            ▶ Send Command
+          </button>
+        </div>
+
+      {/*
       <select
         value={selectedAction}
         onChange={(e) => setSelectedAction(e.target.value)}
@@ -260,7 +318,7 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
         style={{ marginTop: "8px", width: "100%" }}
       >
         Trigger
-      </button>
+      </button>*/}
 
       {actionStatus && (
         <div style={{ marginTop: "6px", fontSize: "0.85rem" }}>

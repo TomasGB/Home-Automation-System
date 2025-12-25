@@ -39,8 +39,11 @@ const App = () => {
 
 
   // Login screen
+
   if (!token) {
-    return <Login onLogin={(tok) => setToken(tok)} />;
+    return <div className="fullscreen-center">
+              <Login onLogin={(tok) => setToken(tok)} />
+            </div>
   }
 
   return (

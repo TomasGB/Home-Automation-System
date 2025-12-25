@@ -87,7 +87,7 @@ const SensorGraph = ({ liveData }) => {
   return (
     <div className="card" style={{ height: "400px" }}>
       <h2>Live Sensor Graph</h2>
-      <ResponsiveContainer width="95%" height="80%">
+      <ResponsiveContainer width="95%" height="75%">
         <LineChart data={data.slice().reverse()}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="timestamp" reversed={true} />
