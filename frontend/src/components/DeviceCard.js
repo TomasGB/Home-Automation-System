@@ -189,22 +189,6 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
           <button onClick={remove}>🗑️</button>
         </div>
       </div>
-      {/*
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "10px"
-        }}
-      >
-        <button onClick={() => onEdit(device)}>✏️</button>
-
-        <button onClick={() => setLearning(true)}>
-          Learn new action
-        </button>
-
-        <button onClick={remove}>🗑️</button>
-      </div>*/} 
       {learning && (
         <div className="learn-panel">
 
@@ -255,11 +239,6 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
         </div>
       )}
 
-      
-      {/*
-      <button onClick={toggle}>
-        Turn {state === "on" ? "OFF" : "ON"}
-      </button>*/}
       <button
         onClick={toggle}
         style={{
@@ -297,29 +276,7 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
             ▶ Send Command
           </button>
         </div>
-
-      {/*
-      <select
-        value={selectedAction}
-        onChange={(e) => setSelectedAction(e.target.value)}
-        style={{ width: "100%", padding: "6px" }}
-      >
-        <option value="">Select action</option>
-        {actions.map((a) => (
-          <option key={a.action} value={a.action}>
-            {a.action}
-          </option>
-        ))}
-      </select>
-
-      <button
-        onClick={triggerAction}
-        disabled={!selectedAction}
-        style={{ marginTop: "8px", width: "100%" }}
-      >
-        Trigger
-      </button>*/}
-
+        
       {actionStatus && (
         <div style={{ marginTop: "6px", fontSize: "0.85rem" }}>
           {actionStatus}

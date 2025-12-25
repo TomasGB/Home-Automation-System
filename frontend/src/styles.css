@@ -87,6 +87,23 @@ button:disabled {
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
   border: 1px solid var(--border);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.card input{
+  max-width: 90%;
+  margin: 10px;
+  align-items: center;
+  text-align: center;
+}
+
+.card select{
+  max-width: 97%;
+  margin: 10px;
+  align-items: center;
+  text-align: center;
 }
 
 .card:hover {
@@ -96,7 +113,7 @@ button:disabled {
 /* Status dot */
 .status-container {
   display: flex;
-  justify-content: center;
+  align-content: center;
   align-items: center;
   margin: 12px;
 }
@@ -135,6 +152,12 @@ input, select {
   padding: 12px;
   border-radius: 12px;
   margin-bottom: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.learn-panel button{
+  margin: 5px;
 }
 
 /* -------------------------------------------
