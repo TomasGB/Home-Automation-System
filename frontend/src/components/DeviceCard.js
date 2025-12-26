@@ -183,7 +183,7 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
       >
         
 
-        <div style={{ display: "flex", gap: "6px" }}>
+        <div style={{ display: "flex", width:"100%", gap: "6px", justifyContent: "space-evenly"}}>
           <button onClick={() => onEdit(device)}>✏️</button>
           <button onClick={() => setLearning(true)}>New Action ✨</button>
           <button onClick={remove}>🗑️</button>
@@ -253,7 +253,7 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
       <div style={{ marginTop: "10px" }}>
         <div style={{ marginTop: "14px" }}>
           <label style={{ fontSize: "0.75rem", color: "#9ca3af" }}>
-            IR Action
+            Action
           </label>
 
           <select
@@ -276,7 +276,7 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
             ▶ Send Command
           </button>
         </div>
-        
+
       {actionStatus && (
         <div style={{ marginTop: "6px", fontSize: "0.85rem" }}>
           {actionStatus}

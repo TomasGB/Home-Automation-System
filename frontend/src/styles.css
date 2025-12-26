@@ -40,6 +40,13 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Layout */
 .header {
   display: flex;
@@ -99,6 +106,18 @@ button:disabled {
   text-align: center;
 }
 
+.login-wrapper .card input{
+  align-items:baseline;
+  align-content: center;
+  max-width: 95%;
+}
+
+.login-wrapper .card button{
+  align-items:baseline;
+  align-content: center;
+  max-width: fit-content;
+  margin: 10px;
+}
 .card select{
   max-width: 97%;
   margin: 10px;
