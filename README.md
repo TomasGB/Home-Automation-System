@@ -1,29 +1,120 @@
-# 🏠 Home Automation System  
-A full-stack home automation platform featuring:
 
-- 🚀 **Backend API (Python + Flask + SQLite + MQTT)**
-- 🖥 **Frontend Dashboard (React + MQTT WebSockets)**
-- 📡 **ESP32 Firmware (MicroPython)**
-- 🔔 **Real-time communication using MQTT**
-- 🔐 **JWT-based authentication**
-- 💡 **LED control + live sensor monitoring**
+# 🏠 Home Automation System
 
-This project provides a complete, expandable home automation solution suitable for learning, prototyping, or building real home features.
+A **full-stack IoT home automation platform** built with **ESP32, MQTT, Flask, and React**, designed with real-world architecture principles: decoupled services, event-driven communication, and scalable device management.
+
+This project integrates embedded hardware with a modern web dashboard, enabling **real-time control, sensor monitoring, IR learning**, and **role-based user management**.
 
 ---
 
-# 📂 Project Structure
+## 🧰 Tech Stack
+
+### Frontend
+- React
+- CSS (custom, responsive layout)
+
+### Backend
+- Flask
+- SQLite
+- REST APIs
+- MQTT client
+
+### Embedded / IoT
+- ESP32
+- MicroPython
+- IR Receiver & IR LED
+- DHT11 sensor
+
+### Communication
+- MQTT (event-driven, decoupled)
+
+---
+
+## 🚀 Features
+
+### 🔌 Device Control
+- Real-time control of devices via MQTT
+- Stateless ESP32 firmware (backend-driven logic)
+- Reliable device state synchronization
+
+### 🌡️ Sensor Monitoring
+- Temperature & humidity monitoring
+- Live updates on the frontend
+- Backend-managed sensor persistence
+
+### 📡 IR Learning & Playback
+- Capture raw IR signals from remotes
+- Store learned IR codes dynamically
+- Replay IR commands on demand (TVs, ACs, etc.)
+
+### 👤 User Management
+- Secure authentication system
+- Role-based access control (**admin / user**)
+- Admin-only device and user management
+
+### 🖥️ Modern Dashboard
+- Responsive React UI
+- Live device cards & sensor data
+- Clean, professional design
+
+---
+
+## 🧠 System Architecture
+
+![alt text](sys_architecture.png "Title")
+
+
+## 🔐 Security & Design Choices
+
+- Authentication handled exclusively by the backend
+- Role validation enforced server-side
+- Devices never trust the frontend directly
+- MQTT topics structured for scalability
+
+---
+
+## 📂 Project Structure
 
 ```
 Home-Automation-System/
-│
-├── backend/        → Flask API + MQTT client + SQLite database
-├── frontend/       → React UI + MQTT WebSocket listener
-├── esp32/          → MicroPython firmware (coming soon)
-├── Docker/         → Docker environment (optional)
-└── README.md       → Root documentation
+├── backend/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── mqtt_client.py
+│   │   ├── database/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   ├── routes/
+│   │   └── models/
+|   |
+│   ├── run.py
+│   ├── requirements.txt
+│   └── database.db
+|
+├── frontend/
+│   └── src/
+│       ├── components/
+│       ├── api/
+│       ├── App.js
+│       └── styles.css
+|
+├── firmware/
+│   ├── devices/
+│   ├── drivers/
+│   ├── devices/
+│   ├── IR_codes/
+│   ├── ir_rx/
+│   ├── ir_tx/
+│   ├── mqtt/
+│   ├── boot.py
+│   ├── config.py
+│   └── main.py
+|
+├── tests/
+|
+└── Docker/
 ```
-
 ---
 
 # ⚙️ System Overview
@@ -146,13 +237,10 @@ Firmware will:
 - Connect to WiFi
 - Connect to MQTT broker
 - Publish sensor data periodically
-- Listen for LED state changes
-
-(Section will be updated when `esp32/` folder is added)
-
+- Listen for DEVICES state changes
 ---
 
-## 5️⃣ Optional: Docker Setup
+## 5️⃣ Docker Setup
 
 Inside the `/Docker` folder you will find:
 
@@ -198,51 +286,3 @@ Authorization: Bearer <token>
 ```
 
 ---
-
-# 📊 Dashboard Preview (Features)
-
-### ✅ Live sensor cards  
-### ✅ Temperature/Humidity graph  
-### ❇ DEVICES status indicator  
-### ⚡ Real-time updates via MQTT  
-### 🔒 JWT session persistence  
-### 🚪 Logout support  
-
----
-
-# 🧱 Technologies Used
-
-### Backend
-- Python 3.12
-- Flask
-- SQLite
-- paho-mqtt
-- JWT
-- CORS
-
-### Frontend
-- React
-- MQTT over WebSockets (`mqtt` package)
-- Chart.js / Recharts (depending on implementation)
-- Fetch API with JWT
-
-### IoT
-- ESP32 + MicroPython
-- DHT11 sensor
-- MQTT
-
----
-
-# 📌 Future Improvements
-
-- Add WebSocket backend relay option  
-- Add multiple device types (relay, PIR, RGB LED, etc.)  
-- Add user roles & permissions UI  
-- Add device auto discovery  
-- Add ESP32 OTA update support  
-
----
-
-# 🎉 Final Notes
-
-This project is fully modular — you can replace sensors, add new MQTT devices, or expand the API without breaking existing functionality.
