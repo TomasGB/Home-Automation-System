@@ -100,7 +100,6 @@ Home-Automation-System/
 │       └── styles.css
 |
 ├── firmware/
-│   ├── devices/
 │   ├── drivers/
 │   ├── devices/
 │   ├── IR_codes/
