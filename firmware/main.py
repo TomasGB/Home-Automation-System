@@ -133,10 +133,12 @@ def on_mqtt_message(topic, msg):
             ir_queue.append(("raw", code))
             print(f"RAW IR queued ({device_id} -> {action})")
             
-            if action == "on" or action == "off":
-                # 2️⃣ Update local state
-                if device_id in device_state:
-                    device_state[device_id] = action
+            if action in ("on", "off"):
+                if device_id == 3:
+                    device_state["tv"] = action
+                elif device_id == 2:
+                    device_state["ac"] = action
+
 
             # 3️⃣ Publish state so backend updates DB
             if device_id == 3:
@@ -310,17 +312,7 @@ def main():
 
                 learning_request = None
                 continue  
-            """
-            if ir_queue:
-                dev, state = ir_queue.pop(0)
 
-                if dev in devices:
-                    devices[dev].send(state)
-                    print(f"IR SENT: {dev} -> {state}")
-                    time.sleep(0.2)
-                else:
-                    print("Unknown device:", dev)
-            """
             if ir_queue:
                 kind, payload = ir_queue.pop(0)
 
@@ -358,4 +350,5 @@ def main():
 # -------------------------
 if __name__ == "__main__":
     main()
+
 
