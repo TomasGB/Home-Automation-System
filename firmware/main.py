@@ -51,8 +51,8 @@ device_state = {
     "ac": None
 }
 
-TV_COOLDOWN_SEC = 2
-AC_COOLDOWN_SEC = 3
+TV_COOLDOWN_SEC = 1
+AC_COOLDOWN_SEC = 2
 
 last_tv_command_time = 0
 last_ac_command_time = 0
@@ -93,7 +93,7 @@ def on_mqtt_message(topic, msg):
     t = topic.decode() if isinstance(topic, bytes) else topic
     payload = msg.decode() if isinstance(msg, bytes) else msg
 
-    print("MQTT:", t, payload)
+    #print("MQTT:", t, payload)
 
     try:
         data = json.loads(payload)
@@ -116,10 +116,12 @@ def on_mqtt_message(topic, msg):
         try:
             data = json.loads(payload)
 
+            device_id = data.get("device_id")
             protocol = data.get("protocol")
             code = data.get("code")
+            action = data.get("action")
 
-            if protocol != "raw" or not code:
+            if protocol != "raw" or not code or not device_id or not action:
                 print("Invalid IR send payload")
                 return
 
@@ -127,13 +129,37 @@ def on_mqtt_message(topic, msg):
             if isinstance(code, str):
                 code = json.loads(code)
 
+            # 1️⃣ Queue IR
             ir_queue.append(("raw", code))
-            print("RAW IR queued")
+            print(f"RAW IR queued ({device_id} -> {action})")
+            
+            if action == "on" or action == "off":
+                # 2️⃣ Update local state
+                if device_id in device_state:
+                    device_state[device_id] = action
 
+            # 3️⃣ Publish state so backend updates DB
+            if device_id == 3:
+                mqtt_client.publish(
+                    TOPIC_TV,
+                    json.dumps({"status": action}),
+                    retain=True
+                )
+                print("TV state published to DB")
+
+            elif device_id == 2:
+                mqtt_client.publish(
+                    TOPIC_AC,
+                    json.dumps({"status": action}),
+                    retain=True
+                )
+                print("AC state published to DB")
+                
         except Exception as e:
             print("Failed to queue IR send:", e)
 
         return
+
 
 
     # ---------- TV ----------
@@ -278,13 +304,23 @@ def main():
                             "device_id": device_id,
                             "action": action,
                             "error": "timeout"
-                        })
+                        },retain=False)
                     )
                     print("IR capture timeout")
 
                 learning_request = None
                 continue  
+            """
+            if ir_queue:
+                dev, state = ir_queue.pop(0)
 
+                if dev in devices:
+                    devices[dev].send(state)
+                    print(f"IR SENT: {dev} -> {state}")
+                    time.sleep(0.2)
+                else:
+                    print("Unknown device:", dev)
+            """
             if ir_queue:
                 kind, payload = ir_queue.pop(0)
 
@@ -322,5 +358,4 @@ def main():
 # -------------------------
 if __name__ == "__main__":
     main()
-
 

@@ -4,7 +4,8 @@ import {
   deleteDevice,
   learnDeviceAction,
   getDeviceActions,
-  triggerDeviceAction
+  triggerDeviceAction,
+  getDevices
 } from "../api/devices";
 
 const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
@@ -20,7 +21,7 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
 
 
 
-  // Normalize LED/switch values
+  // Normalize Devices/switch values
   const normalize = (v) => {
     if (!v) return null;
     v = String(v).trim().toLowerCase();
@@ -77,6 +78,9 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
 
       if (res.success) {
         setActionStatus("Action sent successfully");
+        if (["on", "off"].includes(selectedAction)) {
+          setState(selectedAction);
+        }
       } else {
         setActionStatus("Failed to send action");
       }
@@ -84,13 +88,13 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
       console.error(e);
       setActionStatus("ESP32 not responding");
     }
-
     setTimeout(() => setActionStatus(""), 2000);
     setSelectedAction("");
   };
 
 
   // Toggle device state
+  /*
   const toggle = async () => {
     const next = state === "on" ? "off" : "on";
     const res = await setDeviceState(device.id, next);
@@ -100,7 +104,7 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
     } else {
       console.error("Failed to toggle:", res.error);
     }
-  };
+  };*/
 
   const remove = async () => {
     if (!window.confirm("Delete this device?")) return;
@@ -238,7 +242,7 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
 
         </div>
       )}
-
+      {/*
       <button
         onClick={toggle}
         style={{
@@ -248,7 +252,7 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
         }}
       >
         {state === "on" ? "Power Off" : "Power On"}
-      </button>
+      </button>*/}
 
       <div style={{ marginTop: "10px" }}>
         <div style={{ marginTop: "14px" }}>
