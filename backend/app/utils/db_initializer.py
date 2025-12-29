@@ -7,6 +7,8 @@ def init_db():
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
 
+    cur.execute("PRAGMA foreign_keys = ON;")
+
     # -----------------------------------------------------
     # SENSOR DATA
     # -----------------------------------------------------
@@ -41,7 +43,9 @@ def init_db():
             code TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(device_id, action),
-            FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+            FOREIGN KEY (device_id) 
+            REFERENCES devices(id)
+            ON DELETE CASCADE
         )
     """)
 

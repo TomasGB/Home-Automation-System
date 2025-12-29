@@ -65,3 +65,16 @@ class DeviceActionModel:
             "protocol": row[0],
             "code": row[1]
         }
+
+    @staticmethod
+    def delete_by_device(device_id):
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            DELETE FROM device_actions
+            WHERE device_id = ?
+        """, (device_id,))
+
+        conn.commit()
+        conn.close()

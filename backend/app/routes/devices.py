@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from app.services.device_service import DeviceService
 from app.models.device_model import DeviceModel
 from app.models.device_action_model import DeviceActionModel
+from app.models.device_action_model import DeviceActionModel
 from ..utils.auth_middleware import require_auth
 from app.config import Config
 from app.mqtt_client import mqtt_client
@@ -47,7 +48,10 @@ def set_device_state(device_id):
     # Update DB
     updated = DeviceModel.update_status(device_id, state)
     if not updated:
-        return jsonify({"success": False, "error": "Device not found"}), 404
+        return jsonify({
+            "success": False,
+              "error": "Device not found"
+              }), 404
 
     # Get device info (to know its topic)
     device = DeviceModel.get_by_id(device_id)
@@ -58,23 +62,30 @@ def set_device_state(device_id):
 
     return jsonify({"success": True, "data": {"state": state}})
 
-@devices_bp.delete("/<int:device_id>")
-@require_auth(role="admin")
+@devices_bp.route("/<int:device_id>", methods=["DELETE"])
+@require_auth()
 def delete_device(device_id):
-    device = DeviceModel.get_by_id(device_id)
+    try:
+        if not device_id:
+            return jsonify({
+                "success": False,
+                "error": "Device not found"
+            }), 404
+    
+        # 1️⃣ Delete all actions first
+        DeviceActionModel.delete_by_device(device_id)
 
-    if not device:
+        # 2️⃣ Delete the device
+        DeviceModel.delete(device_id)
+
         return jsonify({
-            "success": False,
-            "error": "Device not found"
-        }), 404
+            "success": True,
+            "message": "Device deleted"
+        })
 
-    DeviceModel.delete(device_id)
+    except Exception as e:
+        return jsonify(success=False, error=str(e)), 500
 
-    return jsonify({
-        "success": True,
-        "message": "Device deleted"
-    })
 
 @devices_bp.put("/<int:device_id>")
 @require_auth(role="admin")
@@ -178,3 +189,4 @@ def trigger_action(device_id, action):
     return jsonify({
         "success": True
     })
+
