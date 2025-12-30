@@ -156,10 +156,10 @@ def learn_action(device_id):
         "message": "Learning mode started. Point the remote and press the button"
     })
 
-@devices_bp.route("/<int:device_id>/actions", methods=["GET"])
+
+"""@devices_bp.route("/<int:device_id>/actions", methods=["GET"])
 @require_auth()
 def get_device_actions(device_id):
-    #actions = DeviceActionModel.get_by_device(device_id=device_id)
 
     try:
         actions = DeviceActionModel.get_by_device(device_id)
@@ -177,7 +177,29 @@ def get_device_actions(device_id):
         return jsonify({
             "success": False,
             "error": str(e)
-        }), 500
+        }), 500"""
+
+@devices_bp.route("/<int:device_id>/actions", methods=["GET"])
+@require_auth()
+def get_device_actions(device_id):
+
+    device = DeviceModel.get_by_id(device_id)
+    if not device:
+        return jsonify({
+            "success": False,
+            "error": "Device not found"
+        }), 404
+
+    actions = DeviceActionModel.get_by_device(device_id)
+
+    return jsonify({
+        "success": True,
+        "data": [
+            {"action": a["action"]}
+            for a in actions
+        ]
+    }), 200
+
 
 @devices_bp.route("/<int:device_id>/actions/<action>/trigger", methods=["POST"])
 @require_auth()

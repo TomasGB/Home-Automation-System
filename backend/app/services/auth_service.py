@@ -34,7 +34,7 @@ class AuthService:
             "user_id": user_id,
             "username": db_username,
             "role": role,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=5)
+            "exp": datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=5)
         }
 
         token = jwt.encode(payload, Config.JWT_SECRET, algorithm="HS256")
