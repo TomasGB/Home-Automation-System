@@ -1,13 +1,11 @@
 import sqlite3
 from app.config import Config
 
-DB_PATH = Config.DB_PATH
-
 class DeviceModel:
 
     @staticmethod
     def create_table():
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS devices (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,7 +18,7 @@ class DeviceModel:
     
     @staticmethod
     def get_all():
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             rows = conn.execute("""
                 SELECT id, name, type, status, mqtt_topic
                 FROM devices
@@ -40,7 +38,7 @@ class DeviceModel:
 
     @staticmethod
     def create_device(name, dev_type, mqtt_topic):
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             conn.execute("""
                 INSERT INTO devices(name, type, status, mqtt_topic)
                 VALUES (?, ?, 'off', ?)
@@ -48,7 +46,7 @@ class DeviceModel:
     
     @staticmethod
     def delete(device_id):
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             cur = conn.execute(
                 "DELETE FROM devices WHERE id = ?",
                 (device_id,)
@@ -77,7 +75,7 @@ class DeviceModel:
 
         values.append(device_id)
 
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             cur = conn.execute(
                 f"UPDATE devices SET {', '.join(fields)} WHERE id = ?",
                 values
@@ -88,7 +86,7 @@ class DeviceModel:
     
     @staticmethod
     def update_status(device_id, status):
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             cur = conn.execute(
                 "UPDATE devices SET status=? WHERE id=?",
                 (status, device_id)
@@ -97,7 +95,7 @@ class DeviceModel:
         
     @staticmethod
     def get_device_status(device_id):
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             cur = conn.execute(
                 "SELECT status FROM devices WHERE id=?",
                 (device_id,)
@@ -111,7 +109,7 @@ class DeviceModel:
     
     @staticmethod
     def get_by_id(device_id):
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             row = conn.execute(
                 "SELECT id, name, type, status, mqtt_topic FROM devices WHERE id=?",
                 (device_id,)
@@ -129,7 +127,7 @@ class DeviceModel:
     
     @staticmethod
     def get_by_mqtt_topic(topic):
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
             cur.execute(

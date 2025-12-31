@@ -1,13 +1,11 @@
 import sqlite3
 from app.config import Config
 
-DB_PATH = Config.DB_PATH
-
 class DeviceActionModel:
 
     @staticmethod
     def create(device_id, action, protocol, code):
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(Config.DB_PATH)
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -21,7 +19,7 @@ class DeviceActionModel:
 
     @staticmethod
     def get_by_device(device_id):
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(Config.DB_PATH)
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -45,7 +43,7 @@ class DeviceActionModel:
 
     @staticmethod
     def get(device_id, action):
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(Config.DB_PATH)
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -68,7 +66,7 @@ class DeviceActionModel:
 
     @staticmethod
     def delete_by_device(device_id):
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(Config.DB_PATH)
         cursor = conn.cursor()
 
         cursor.execute("""

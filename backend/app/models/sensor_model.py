@@ -3,13 +3,11 @@ from app.config import Config
 import time
 from datetime import datetime
 
-DB_PATH = Config.DB_PATH
-
 class SensorModel:
     
     @staticmethod
     def create_table():
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS sensor_data (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +30,7 @@ class SensorModel:
         formatted_time = local_time.strftime('%d-%m-%Y %H:%M')
 
         # Single connection block, no nested connects
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO sensor_data (temperature, humidity, timestamp)
@@ -43,7 +41,7 @@ class SensorModel:
 
     @staticmethod
     def get_latest():
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             return conn.execute("""
                 SELECT * FROM sensor_data
                 ORDER BY timestamp DESC
@@ -52,7 +50,7 @@ class SensorModel:
 
     @staticmethod
     def get_history(limit=50):
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(Config.DB_PATH) as conn:
             return conn.execute("""
                 SELECT * FROM sensor_data
                 ORDER BY timestamp DESC

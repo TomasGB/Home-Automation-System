@@ -1,13 +1,21 @@
 import sqlite3
 import os
+from app.config import Config
 
-DB_PATH = "database.db"
+#DB_PATH = "database.db"
 
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
+    assert "test" in Config.DB_PATH.lower() or not Config.TESTING, \
+        "❌ init_db is using a NON-test database during tests!"
+
+    conn = sqlite3.connect(Config.DB_PATH)
     cur = conn.cursor()
 
     cur.execute("PRAGMA foreign_keys = ON;")
+    #conn = sqlite3.connect(DB_PATH)
+    #cur = conn.cursor()
+
+    #cur.execute("PRAGMA foreign_keys = ON;")
 
     # -----------------------------------------------------
     # SENSOR DATA
