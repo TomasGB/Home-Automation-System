@@ -65,7 +65,6 @@ def seed_test_user(app):
 
 @pytest.fixture(scope="session", autouse=True)
 def promote_test_user_to_admin(seed_test_user, app):
-    """⚠️ Must depend on seed_test_user to guarantee order"""
     from app.config import Config
 
     assert "test" in Config.DB_PATH.lower()

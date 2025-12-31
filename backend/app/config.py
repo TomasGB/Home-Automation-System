@@ -5,6 +5,8 @@ class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     DB_PATH = os.getenv("DB_PATH", os.path.join(BASE_DIR, "..", "database.db"))
 
+    TESTING = False
+
     # MQTT
     MQTT_BROKER = os.getenv("MQTT_BROKER", "test.mosquitto.org")
     MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
