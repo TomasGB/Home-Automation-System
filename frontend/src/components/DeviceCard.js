@@ -12,13 +12,11 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
   const [state, setState] = useState(device.status ?? "unknown");
   const [learning, setLearning] = useState(false);
   const [actionName, setActionName] = useState("");
-  const [learningStatus, setLearningStatus] = useState("idle");
-  // idle | listening | success | error
+  const [learningStatus, setLearningStatus] = useState("idle"); // idle | listening | success | error
   const [learningMessage, setLearningMessage] = useState("");
   const [actions, setActions] = useState([]);
   const [selectedAction, setSelectedAction] = useState("");
   const [actionStatus, setActionStatus] = useState("");
-
 
 
   // Normalize Devices/switch values
@@ -91,20 +89,6 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
     setTimeout(() => setActionStatus(""), 2000);
     setSelectedAction("");
   };
-
-
-  // Toggle device state
-  /*
-  const toggle = async () => {
-    const next = state === "on" ? "off" : "on";
-    const res = await setDeviceState(device.id, next);
-
-    if (res.success) {
-      setState(next);
-    } else {
-      console.error("Failed to toggle:", res.error);
-    }
-  };*/
 
   const remove = async () => {
     if (!window.confirm("Delete this device?")) return;
@@ -242,17 +226,6 @@ const DeviceCard = ({ device, liveUpdate, onDeleted, onEdit }) => {
 
         </div>
       )}
-      {/*
-      <button
-        onClick={toggle}
-        style={{
-          background: state === "on" ? "var(--danger)" : "var(--success)",
-          width: "100%",
-          marginTop: "8px"
-        }}
-      >
-        {state === "on" ? "Power Off" : "Power On"}
-      </button>*/}
 
       <div style={{ marginTop: "10px" }}>
         <div style={{ marginTop: "14px" }}>

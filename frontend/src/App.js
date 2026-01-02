@@ -51,7 +51,7 @@ const App = () => {
       {/* Invisible MQTT listener */}
       <MqttListener
         onData={(d) => setLiveSensor(d)}
-        onLed={(l) => setLiveDevices(l)}
+        onDevice={(l) => setLiveDevices(l)}
       />
 
       {/* Header */}
